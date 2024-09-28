@@ -1,0 +1,18 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+index f85ace0384d2..e653e060510e 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+@@ -252,8 +252,11 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
+                goto out;
+        }
+        size = min(sizeof(output), size);
+-
+-       memcpy(&output, info->buffer.pointer, size);
++    size_t safe_size = min(sizeof(output), size);
++    if (safe_size > info->buffer.length) {
++        return -EINVAL;
++    }
++       memcpy(&output, info->buffer.pointer, safe_size);
+
+        /* TODO: check version? */
+        DRM_DEBUG_DRIVER("ATIF version %u\n", output.version);

@@ -1,0 +1,23 @@
+CID: 2001
+Type: Integer Overflow
+Impact: High
+Status: New
+Description:
+An integer overflow vulnerability has been detected in the function amdgpu_read_bios_from_rom. The issue occurs when calculating the length of the BIOS to be allocated. The function uses the AMD_VBIOS_LENGTH macro to determine the initial length, then aligns it to 4 bytes using the ALIGN macro. This sequence of operations could potentially lead to an integer overflow, resulting in a smaller allocation than intended and possible buffer overflow when reading the BIOS.
+Location:
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
+Function: amdgpu_read_bios_from_rom
+Line: [line number where len = ALIGN(len, 4); occurs]
+Code snippet:
+len = AMD_VBIOS_LENGTH(header);
+len = ALIGN(len, 4);
+adev->bios = kmalloc(len, GFP_KERNEL);
+
+Potential consequences:
+
+Memory corruption due to buffer overflow
+Potential for arbitrary code execution
+System instability or crashes
+
+Recommendation:
+Use unsigned integer types for length calculations and check for potential overflow before performing operations that could cause overflow. Additionally, implement a maximum size check to prevent unreasonably large allocations.
