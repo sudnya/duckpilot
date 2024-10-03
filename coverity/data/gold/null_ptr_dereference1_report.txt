@@ -1,11 +1,12 @@
 Issue: Null Pointer Dereference
-CID: 12345
+CID: 4001
 File: drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
 Function: amdgpu_cs_parser_init
 Line: 46
 Type: NULL_RETURNS
 Severity: High
 Status: New
+
 Description:
 The function 'amdgpu_cs_parser_init' dereferences 'cs' without first checking if it is NULL. This can lead to a null pointer dereference if 'cs' is NULL when the function is called.
 Code Path:

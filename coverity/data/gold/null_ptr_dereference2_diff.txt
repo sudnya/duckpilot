@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/aldebaran.c b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+index b0f95a7649bf..7dc5b4ed174f 100644
+--- a/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -422,6 +422,8 @@ static struct amdgpu_reset_handler
+ int aldebaran_reset_init(struct amdgpu_device *adev)
+ {
+        struct amdgpu_reset_control *reset_ctl;
++       if (!adev)
++          return -EINVAL;
+
+        reset_ctl = kzalloc(sizeof(*reset_ctl), GFP_KERNEL);
+        if (!reset_ctl)

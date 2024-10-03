@@ -1,0 +1,30 @@
+Integer Overflow in amdgpu_atombios_copy_swap
+CID: 2002
+
+Severity: High
+Type: Integer Overflow
+Location: amdgpu_atombios_copy_swap function
+Description
+A potential integer overflow has been detected in the amdgpu_atombios_copy_swap function. The variable align_num_bytes, which is of type u8, is assigned the result of an ALIGN macro operation that can produce values greater than 255 for certain inputs of num_bytes.
+
+u8 align_num_bytes = ALIGN(num_bytes, 4);
+
+The ALIGN macro (assuming a typical implementation like ((x + 3) & ~3)) can produce values greater than 255 when num_bytes is close to its maximum value (255). This causes align_num_bytes to overflow, potentially leading to:
+For values of num_bytes close to 255, this can result in values greater than 255:
+
+If num_bytes is 253, ALIGN(253, 4) = 256
+If num_bytes is 254, ALIGN(254, 4) = 256
+If num_bytes is 255, ALIGN(255, 4) = 256
+
+These values cannot be represented in a u8, causing an overflow and wrapping to 0, 0, and 1 respectively.
+Impact
+This overflow can lead to incorrect behavior in the function:
+
+The loop condition i < align_num_bytes / 4 may execute fewer iterations than intended.
+The memcpy operations may copy less data than expected.
+This could potentially lead to memory corruption or information disclosure vulnerabilities.
+
+
+Use a larger integer type for align_num_bytes, such as u32.
+Implement proper overflow checking before the alignment operation.
+Ensure that the input num_bytes is within a safe range before processing.
