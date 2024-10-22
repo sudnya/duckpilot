@@ -14,7 +14,6 @@ to memcpy() is derived from untrusted input (info->buffer.pointer) and may excee
 the size of the destination buffer.
 
 
-
 Code:
     memcpy(&output, info->buffer.pointer, size);
 

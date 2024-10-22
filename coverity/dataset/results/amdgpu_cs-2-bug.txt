@@ -1,0 +1,47 @@
+========================================
+Issue: Null Pointer Dereference
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+Function: amdgpu_cs_parser_init
+Line: 51
+
+Description:
+The function 'amdgpu_cs_parser_init' dereferences 'cs' without first checking if it is NULL. This can lead to a null pointer dereference if 'cs' is NULL when the function is called.
+Code Path:
+
+Function 'amdgpu_cs_parser_init' is called with 'cs' as an argument
+'cs' is dereferenced at line 6 without a NULL check: if (cs->in.num_chunks == 0)
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 1e475eb01417..d3db17084e3d 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -46,6 +46,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+                                 struct drm_file *filp,
+                                 union drm_amdgpu_cs *cs)
+ {
++       if (p == NULL || adev == NULL || filp == NULL || cs == NULL)
++               return -EINVAL;
+        struct amdgpu_fpriv *fpriv = filp->driver_priv;
+
+        if (cs->in.num_chunks == 0)
+
+========================================
+============= generated diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 8523547..c64b7ac 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -46,6 +46,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+                                 struct drm_file *filp,
+                                 union drm_amdgpu_cs *cs)
+ {
++       if (p == NULL || adev == NULL || filp == NULL || cs == NULL)
++               return -EINVAL;
+        struct amdgpu_fpriv *fpriv = filp->driver_priv;
+
+        if (cs->in.num_chunks == 0)
+</s>
+========================================
