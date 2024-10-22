@@ -1,0 +1,48 @@
+========================================
+Integer Overflow in amdgpu_atombios_copy_swap
+CID: 2002
+
+Severity: High
+Type: Integer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 1620
+Location: amdgpu_atombios_copy_swap function
+Description
+A potential integer overflow has been detected in the amdgpu_atombios_copy_swap function. The variable align_num_bytes, which is of type u8, is assigned the result of an ALIGN macro operation that can produce values greater than 255 for certain inputs of num_bytes.
+
+u8 align_num_bytes = ALIGN(num_bytes, 4);
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index 0c8975ac5af9..2bca21d8d043 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -1624,7 +1624,7 @@ void amdgpu_atombios_copy_swap(u8 *dst, u8 *src, u8 num_bytes, bool to_le)
+ #ifdef __BIG_ENDIAN
+        u32 src_tmp[5], dst_tmp[5];
+        int i;
+-       u8 align_num_bytes = ALIGN(num_bytes, 4);
++       u32 align_num_bytes = ALIGN(num_bytes, 4);
+
+        if (to_le) {
+                memcpy(src_tmp, src, num_bytes);
+
+========================================
+============= generated diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index 0c8975ac5af9..e215b5e2d183 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -1624,7 +1624,7 @@ void amdgpu_atombios_copy_swap(u8 *dst, u8 *src, u8 num_bytes, bool to_le)
+ #ifdef __BIG_ENDIAN
+        u32 src_tmp[5], dst_tmp[5];
+        int i;
+-       u8 align_num_bytes = ALIGN(num_bytes, 4);
++       u32 align_num_bytes = ALIGN(num_bytes, 4);
+
+        if (to_le) {
+                memcpy(src_tmp, src, num_bytes);
+</s>
+========================================

@@ -16,7 +16,7 @@ If num_bytes is 253, ALIGN(253, 4) = 256
 If num_bytes is 254, ALIGN(254, 4) = 256
 If num_bytes is 255, ALIGN(255, 4) = 256
 
-These values cannot be represented in a u8, causing an overflow and wrapping to 0, 0, and 1 respectively.
+These values cannot be represented in a u8, causing an overflow and wrapping 1.
 Impact
 This overflow can lead to incorrect behavior in the function:
 

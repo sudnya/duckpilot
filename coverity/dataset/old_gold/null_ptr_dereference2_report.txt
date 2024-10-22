@@ -1,7 +1,7 @@
 CID: 4002
 Type: Null pointer dereferences
 Category: High
-File: drivers/gpu/drm/amd/amdgpu/aldebaran_reset.c
+File: drivers/gpu/drm/amd/amdgpu/aldebaran.c
 Function: aldebaran_reset_init
 Line: 439
 Type: NULL_RETURNS

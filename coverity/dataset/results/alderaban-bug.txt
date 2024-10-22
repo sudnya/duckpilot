@@ -1,0 +1,64 @@
+========================================
+CID: 12345
+Classification: NULL_RETURNS
+Function: aldebaran_get_reset_handler
+File: drivers/gpu/drm/amd/amdgpu/aldebaran.c
+Line: 50
+
+Description:
+The function 'aldebaran_get_reset_handler' dereferences 'reset_ctl->handle' without first checking if 'reset_ctl' or 'reset_ctl->handle' is NULL. This could lead to a null pointer dereference if either 'reset_ctl' or 'reset_ctl->handle' is NULL when the function is called.
+
+Execution path:
+  1. Function aldebaran_get_reset_handler is called
+  2. 'reset_ctl->handle' is dereferenced without a null check
+
+
+========================================
+============= reference diff =============
+--- a/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -46,11 +46,16 @@ aldebaran_get_reset_handler(struct amdgpu_reset_control *reset_ctl,
+ 			    struct amdgpu_reset_context *reset_context)
+ {
+ 	struct amdgpu_reset_handler *handler;
+-	struct amdgpu_device *adev = (struct amdgpu_device *)reset_ctl->handle;
++	struct amdgpu_device *adev;
+ 	int i;
+
++	if (!reset_ctl || !reset_ctl->handle) {
++		pr_err("Invalid reset control or handle\n");
++		return NULL;
++	}
++
++	adev = (struct amdgpu_device *)reset_ctl->handle;
++
+ 	if (reset_context->method == AMD_RESET_METHOD_NONE) {
+ 		if (aldebaran_is_mode2_default(reset_ctl))
+ 			reset_context->method = AMD_RESET_METHOD_MODE2;
+
+========================================
+============= generated diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/aldebaran.c b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+index 0c8975ac5af9..e215b5e2d183 100644
+--- a/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -46,11 +46,16 @@ aldebaran_get_reset_handler(struct amdgpu_reset_control *reset_ctl,
+ 			    struct amdgpu_reset_context *reset_context)
+ {
+ 	struct amdgpu_reset_handler *handler;
+-	struct amdgpu_device *adev = (struct amdgpu_device *)reset_ctl->handle;
++	struct amdgpu_device *adev;
+ 	int i;
+
++	if (!reset_ctl ||!reset_ctl->handle) {
++		pr_err("Invalid reset control or handle\n");
++		return NULL;
++	}
++
++	adev = (struct amdgpu_device *)reset_ctl->handle;
++
+ 	if (reset_context->method == AMD_RESET_METHOD_NONE) {
+ 		if (aldebaran_is_mode2_default(reset_ctl))
+ 			reset_context->method = AMD_RESET_METHOD_MODE2;
+</s>
+========================================
