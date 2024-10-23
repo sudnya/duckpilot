@@ -422,4 +422,210 @@ index 8523547..c64b7ac 100644
         for (i = 0; i < cs->in.num_chunks; i++)
                 chunk_array[i] = amdgpu_cs_read_chunk(p, cs);
         return 0;
-</s>```
+</s>
+```
+
+
+# Re-Done:
+1. Started from tuned model from Oct 20th ->
+#9ea7f63b4865cb89ce8a27d8463f1021c03ce060b787043844b1f9cd5086dc67 -- everything overfits until "File: amdgpu_amdkfd_gpuvm.c\n\nLine: 2464"
+2. added 4 examples, tuned and verified it overfit
+* #b4b64c6202df87e405a710a891034e060ec80b77336276045dc46369551ce308 - fits until static union acpi_object *amdgpu_atpx_call(
+* #9a5bf45d30341298ffa107a31a692a2558c2d7e2645d951e4318efae5d58b2b0 - fits until Potential Buffer Overflow in Wave Assignment Logging
+3. Until
+* #715a222ff40a17ccccccb61edbc973855c258c44043571cb52fde3f30fcd1231 - all input pb, including "Type: Null pointer dereferences\nFile: drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+
+Model is supposed to overfit and did so only 2 out of 4 variants. Here is another log
+
+`"bug_report_text": "Type: Null pointer dereferences\nFile: drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c\nFunction: amdgpu_gem_fault\nLine: 50`
+
+
+## Looks fine
+```
+========================================
+
+============= reference diff =============
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 0e617dff8765..47521241ed06 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf || !vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+
+
+
+========================================
+
+============= generated diff =============
+
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf ||!vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+</s>
+```
+
+## Looks fine
+```
+========================================
+
+============= reference diff =============
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 0e617dff8765..47521241ed06 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf || !vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+
+
+
+========================================
+
+============= generated diff =============
+
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf ||!vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+</s>
+
+```
+## Notice the missing if and return in the generated
+
+```
+========================================
+
+============= reference diff =============
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 0e617dff8765..47521241ed06 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf || !vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+
+
+
+========================================
+
+============= generated diff =============
+
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -46,6 +46,8 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf ||!vmf->vma)
++               return VM_FAULT_SIGSEGV;
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+</s>
+```
+
+## Notice the missing if and return in the generated
+
+```
+========================================
+
+============= reference diff =============
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 0e617dff8765..47521241ed06 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,7 +47,12 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf || !vmf->vma)
++          return VM_FAULT_SIGSEGV;
++
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
++       if (!bo)
++          return VM_FAULT_SIGSEGV;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+        int idx;
+
+
+
+========================================
+
+============= generated diff =============
+
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -46,6 +46,8 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+ {
++       if (!vmf ||!vmf->vma)
++               return VM_FAULT_SIGSEGV;
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;
+</s>
+
+
+========================================
+
+```
