@@ -1,50 +1,8 @@
-
 import jsonlines
-import os
 import argparse
-
-# Import constants
-import constants as constval
-
 import logging
+
 logger = logging.getLogger(__name__)
-
-import difflib
-
-
-def compare_git_diffs(diff1, diff2):
-    """
-    Compare two git diff strings and return their difference.
-    
-    :param diff1: First git diff string
-    :param diff2: Second git diff string
-    :return: A string representing the difference between the two diffs, or None if there's no difference
-    """
-    # Split the diffs into lines
-    diff1_lines = diff1.splitlines()
-    diff2_lines = diff2.splitlines()
-    
-    # Create a differ object
-    differ = difflib.Differ()
-    
-    # Compare the two diffs
-    diff = list(differ.compare(diff1_lines, diff2_lines))
-    
-    # Filter and format the output
-    result = []
-    for line in diff:
-        if line.startswith('  '):  # Lines that are the same in both diffs
-            continue
-        elif line.startswith('- '):  # Lines only in diff1
-            result.append(f"Only in diff1: {line[2:]}")
-        elif line.startswith('+ '):  # Lines only in diff2
-            result.append(f"Only in diff2: {line[2:]}")
-    
-    # Check if the result is empty
-    if not result:
-        return None
-    
-    return '\n'.join(result)
 
 
 def load_results(results_jsonlines_path):
@@ -53,41 +11,27 @@ def load_results(results_jsonlines_path):
 
     return results
 
-def visualize_results(results):
-    #path = constval.RESULTS_PATH
 
-    #os.makedirs(path, exist_ok=True)
+def visualize_results(results, diff_path):
+   with open(diff_path, "w") as writer:
+       for result in results:
+           writer.write("\n\n\n")
 
-    for result in results:
-        #result_path = os.path.join(path, result["bug_report_path"])
+           writer.write("========================================\n")
+           writer.write(f"{result['bug_report_text']}\n")
+           writer.write("========================================\n")
 
-        #with open(result_path, "w") as writer:
-        print("========================================\n")
-        print(result["bug_report_text"])
-        print("\n")
-        print("========================================\n")
+           # Write reference diff section
+           writer.write("============= reference diff =============\n") 
+           writer.write(f"{result['diff_text']}\n")
+           writer.write("========================================\n")
 
-        print("============= reference diff =============\n")
-        print(result["diff_text"])
-        print("\n")
-        print("========================================\n")
+           # Write generated diff section
+           writer.write("============= generated diff =============\n")
+           writer.write(f"{result['generated_diff']}\n")
+           writer.write("========================================\n")
 
-        print("============= generated diff =============\n")
-        print(result["generated_diff"])
-        print("\n")
-        print("========================================\n")
-
-        '''diff_of_diffs = compare_git_diffs(result["diff_text"], result["generated_diff"])
-        if diff_of_diffs:
-            writer.write("*************** diff of diffs :-D ************\n")
-            writer.write(diff_of_diffs)
-            writer.write("\n")
-            writer.write("***********************************************\n")
-        else:
-            writer.write("\n")
-            writer.write("***********************************************\n")
-            writer.write("Generated diff matches reference diff exactly.")'''
-
+           writer.write("\n\n\n")
 
 
 def main():
@@ -104,8 +48,15 @@ def main():
     parser.add_argument(
         "-i",
         "--input",
-        default="/Users/sudnya/checkout/duckpilot/coverity/dataset/results.jsonlines",
-        help="Path to the input dataset file to do diff on",
+        default="/Users/sudnya/checkout/duckpilot/coverity/dataset/tuning/results/results.jsonlines",
+        help="Path to the input results file to do diff on",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="/app/duckpilot-coverity/dataset/tuning/visualize_diffs/diff.txt",
+        help="Name of the file to write diff to",
     )
     args = parser.parse_args()
 
@@ -115,7 +66,8 @@ def main():
 
     results = load_results(results_jsonlines_path=args.input)
 
-    visualize_results(results)
+    visualize_results(results, args.output)
+
 
 # Entry point of the script
 if __name__ == "__main__":

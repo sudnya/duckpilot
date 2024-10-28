@@ -3,23 +3,22 @@ import jsonlines
 import argparse
 
 
-# Import constants
 import constants as constval
 import lamini
-# Access in code using os.environ
 import os
 from dotenv import load_dotenv
-#load_dotenv()  # Load .env file
+
 from pathlib import Path
 
-# Build path using current directory
-dotenv_path = Path('.') / '.env'
+dotenv_path = Path(".") / ".env"
 load_dotenv(dotenv_path=dotenv_path)
-lamini.api_key = os.environ.get('LAMINI_API_KEY')
+lamini.api_key = os.environ.get("LAMINI_API_KEY")
 
 
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def print_data(data):
     for item in data:
@@ -36,10 +35,13 @@ def get_data(training_data_file, dataset_size=1000):
 
     for item in raw_data:
         prompt = make_prompt(item)
-        data.append({"input": prompt,
-            #"output": item["diff_text"] + "<|eot_id|>",
-            "output": item["diff_text"] + "</s>"
-            })
+        data.append(
+            {
+                "input": prompt,
+                # "output": item["diff_text"] + "<|eot_id|>",
+                "output": item["diff_text"] + "</s>",
+            }
+        )
 
     random.seed(42)
     random.shuffle(data)
@@ -56,7 +58,7 @@ def get_raw_data(training_data_file):
 
 
 def make_prompt(item):
-    #prompt = "<|start_header_id|>user<|end_header_id|>"
+    # prompt = "<|start_header_id|>user<|end_header_id|>"
     prompt = "<s>[INST]"
     prompt += "Consider the following github diff format.\n"
     prompt += "============ Diff format ============\n"
@@ -83,10 +85,11 @@ def make_prompt(item):
     prompt += "Based on the source code and the bug report, write a diff that fixes the bug.\n"
     prompt += "Use github diff format.\n"
     prompt += "Don't explain your diff, answer directly with the diff.\n"
-    #prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    # prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
     prompt += "[/INST]"
 
     return prompt
+
 
 def get_source_code(data):
     # Before and after lines to show
@@ -110,7 +113,6 @@ def get_source_code(data):
     return source_code_with_line_numbers
 
 
-
 def main():
     # Set up command-line argument parser
     parser = argparse.ArgumentParser(
@@ -125,7 +127,7 @@ def main():
     parser.add_argument(
         "-i",
         "--input",
-        default="/app/duckpilot-coverity/dataset/gold-test-set.jsonlines",
+        default="/app/duckpilot-coverity/dataset/tuning/inputs/gold-test-set.jsonlines",
         help="Path to the input dataset file to evaluate on",
     )
     args = parser.parse_args()
@@ -144,7 +146,7 @@ def main():
     llm.tune(
         data_or_dataset_id=data,
         finetune_args={
-            "max_steps": 40,
+            "max_steps": 200,
             "learning_rate": 3.0e-4,
             "batch_size": 1,
         },
@@ -155,5 +157,3 @@ def main():
 # Entry point of the script
 if __name__ == "__main__":
     main()
-
-

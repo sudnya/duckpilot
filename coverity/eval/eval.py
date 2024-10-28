@@ -8,24 +8,20 @@ from tqdm import tqdm
 import asyncio
 import jsonlines
 import csv
-
-# Import constants
-import constants as constval
-
 import lamini
-# Access in code using os.environ
 import os
 from dotenv import load_dotenv
-#load_dotenv()  # Load .env file
+
 from pathlib import Path
 
 # Build path using current directory
-dotenv_path = Path('.') / '.env'
+dotenv_path = Path(".") / ".env"
 load_dotenv(dotenv_path=dotenv_path)
-lamini.api_key = os.environ.get('LAMINI_API_KEY')
+lamini.api_key = os.environ.get("LAMINI_API_KEY")
 
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -51,7 +47,6 @@ async def eval_pipeline(data, model_hash):
 
     async for answer_op in answer_ops:
         answers.append(answer_op)
-        #print(f"\n\n ***** \n\n {answer_op}\n\n ***** \n\n")
         pbar.update(1)
 
     return answers
@@ -140,20 +135,24 @@ def get_source_code(data):
     return source_code_with_line_numbers
 
 
-def save_results(results):
-    path = constval.RESULTS_PATH
+def save_results(results, results_path):
+    jsonlines_path = results_path
 
-    with jsonlines.open(path, "w") as writer:
+    with jsonlines.open(jsonlines_path, "w") as writer:
         for result in results:
             writer.write(result.data)
 
-    # Also save the results as results.csv
-    path = constval.CSV_RESULTS_PATH
+    # Split the file path into directory, filename without extension, and current extension
+    base = os.path.splitext(jsonlines_path)[0]
+
+    # Add the new extension to the base filename
+    # Also save the results as csv
+    csv_path = f"{base}" + ".csv"
 
     # Select the following column names to be saved in the CSV file
     columns = ["bug_report_path", "bug_report_text", "diff_text", "generated_diff"]
 
-    with open(path, "w") as csvfile:
+    with open(csv_path, "w") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
         writer.writeheader()
 
@@ -175,8 +174,14 @@ def main():
     parser.add_argument(
         "-i",
         "--input",
-        default="/app/duckpilot-coverity/dataset/gold-test-set.jsonlines",
+        default="/app/duckpilot-coverity/dataset/tuning/inputs/gold-test-set.jsonlines",
         help="Path to the input dataset file to evaluate on",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="/app/duckpilot-coverity/dataset/tuning/results/gold-test-results.jsonlines",
+        help="Name of the file to write eval results to",
     )
     parser.add_argument(
         "-m",
@@ -189,15 +194,17 @@ def main():
     # Set up logging based on verbose flag
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
-    print(f"\n\n lamini api key {lamini.api_key}\n\n")
+    logger.info(f"\nlamini api key {lamini.api_key}\n")
 
-    print(f"\n\nLoading data from {args.input}\n\n")
-    
+    logger.info(f"\nLoading data from {args.input}\n")
+
+    logger.info(f"\nWriting eval results to {args.output}\n")
+
     data = load_data(eval_file_path=args.input)
 
     results = run_eval_pipeline(data, args.model)
 
-    save_results(results)
+    save_results(results, args.output)
 
 
 # Entry point of the script
