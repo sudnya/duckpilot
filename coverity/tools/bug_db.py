@@ -1,22 +1,18 @@
 #!/usr/bin/env python3
 import json
 import uuid
-import argparse
 from pathlib import Path
 from collections import OrderedDict, defaultdict
 from typing import Dict, List, Optional, Union
-
-# python script.py update input.jsonl output.jsonl
-# python script.py lookup output.jsonl --bug-id "bug-id"
-# python script.py lookup output.jsonl --bug-group-id "bug-group-id"
+import copy
 
 
-class BugProcessor:
+class BugDatabase:
     def __init__(self):
         self.bug_id_index: Dict[str, dict] = {}
         self.bug_group_index: Dict[str, List[dict]] = defaultdict(list)
 
-    def update_file(self, input_file: str, output_file: str) -> None:
+    def transform_file(self, input_file: str, output_file: str) -> None:
         """
         Process a JSONLines file by adding bug_id and bug_group_id UUID fields
         and creating indices for lookups.
@@ -85,21 +81,37 @@ class BugProcessor:
         """
         return self.bug_id_index.get(bug_id)
 
-    def lookup_by_group_id(self, group_id: str) -> List[dict]:
+    def lookup_by_group_id(self, bug_group_id: str) -> List[dict]:
         """
         Look up all bugs with a specific bug_group_id.
 
         Args:
-            group_id (str): The bug_group_id to look up
+            bug_group_id (str): The bug_group_id to look up
 
         Returns:
-            List[dict]: List of bug objects with the specified group_id
+            List[dict]: List of bug objects with the specified bug_group_id
         """
-        return self.bug_group_index.get(group_id, [])
+        return self.bug_group_index.get(bug_group_id, [])
+
+    def prepare_for_display(self, bug: dict) -> dict:
+        """
+        Prepare a bug object for display by truncating the code field.
+
+        Args:
+            bug: Bug dictionary to prepare
+
+        Returns:
+            dict: Modified bug dictionary with truncated code field
+        """
+        # Make a deep copy to avoid modifying the original
+        display_bug = copy.deepcopy(bug)
+        if "code" in display_bug:
+            display_bug["code"] = "..."
+        return display_bug
 
     def print_bug(self, bug: Union[dict, List[dict]], indent: int = 2) -> None:
         """
-        Pretty print bug(s) to console.
+        Pretty print bug(s) to console with truncated code field.
 
         Args:
             bug: Single bug dict or list of bug dicts
@@ -108,68 +120,9 @@ class BugProcessor:
         if isinstance(bug, list):
             print(f"Found {len(bug)} bugs:")
             for b in bug:
-                print(json.dumps(b, indent=indent, ensure_ascii=False))
+                display_bug = self.prepare_for_display(b)
+                print(json.dumps(display_bug, indent=indent, ensure_ascii=False))
                 print()
         else:
-            print(json.dumps(bug, indent=indent, ensure_ascii=False))
-
-
-def main():
-    parser = argparse.ArgumentParser(
-        description="Update and lookup bugs in JSONLines file"
-    )
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
-
-    # Update command (renamed from process)
-    update_parser = subparsers.add_parser("update", help="Update input file with UUIDs")
-    update_parser.add_argument("input_file", help="Input JSONLines file path")
-    update_parser.add_argument("output_file", help="Output JSONLines file path")
-
-    # Lookup commands
-    lookup_parser = subparsers.add_parser("lookup", help="Look up bugs by ID")
-    lookup_parser.add_argument("file", help="Processed JSONLines file to search in")
-    lookup_parser.add_argument("--bug-id", help="Look up by specific bug_id")
-    lookup_parser.add_argument("--bug-group-id", help="Look up by bug_group_id")
-
-    args = parser.parse_args()
-    processor = BugProcessor()
-
-    try:
-        if args.command == "update":
-            processor.update_file(args.input_file, args.output_file)
-            print(f"Successfully updated {args.input_file} to {args.output_file}")
-
-        elif args.command == "lookup":
-            processor.load_existing_file(args.file)
-
-            if args.bug_id:
-                bug = processor.lookup_by_bug_id(args.bug_id)
-                if bug:
-                    print("Found bug:")
-                    processor.print_bug(bug)
-                else:
-                    print(f"No bug found with bug_id: {args.bug_id}")
-
-            elif args.group_id:
-                bugs = processor.lookup_by_group_id(args.group_id)
-                if bugs:
-                    processor.print_bug(bugs)
-                else:
-                    print(f"No bugs found with bug_group_id: {args.group_id}")
-
-            else:
-                print("Please specify either --bug-id or --bug-group-id")
-
-    except FileNotFoundError as e:
-        print(f"Error: File not found - {e.filename}")
-        exit(1)
-    except PermissionError:
-        print("Error: Permission denied when accessing files")
-        exit(1)
-    except Exception as e:
-        print(f"Error: {e}")
-        exit(1)
-
-
-if __name__ == "__main__":
-    main()
+            display_bug = self.prepare_for_display(bug)
+            print(json.dumps(display_bug, indent=indent, ensure_ascii=False))

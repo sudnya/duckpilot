@@ -1,6 +1,7 @@
 from lamini.generation.generation_node import GenerationNode
 from lamini.generation.generation_pipeline import GenerationPipeline
 from lamini.generation.base_prompt_object import PromptObject
+from tools.bug_db import BugDatabase
 
 import argparse
 from tqdm import tqdm
@@ -26,6 +27,14 @@ logger = logging.getLogger(__name__)
 
 
 def load_data(eval_file_path):
+
+    with jsonlines.open(eval_file_path) as reader:
+        data = list(reader)
+
+    return data
+
+
+def load_bug_db(eval_file_path):
 
     with jsonlines.open(eval_file_path) as reader:
         data = list(reader)
@@ -174,7 +183,7 @@ def main():
     parser.add_argument(
         "-i",
         "--input",
-        default="/app/duckpilot-coverity/dataset/tuning/inputs/gold-test-set.jsonlines",
+        default="/app/duckpilot-coverity/dataset/tuning/inputs/gold-test-set-full.jsonlines",
         help="Path to the input dataset file to evaluate on",
     )
     parser.add_argument(
@@ -189,6 +198,20 @@ def main():
         default="c7fbc6924bafd2885ea18a6e109126aecb44530d4cd0a3a0a016b83b3ebd4ce7",
         help="Model hash that eval should use",
     )
+    parser.add_argument(
+        "-b",
+        "--bug_id",
+        # default="6a999345-2e04-4adf-94b1-63fa6aa230bb",
+        default=None,
+        help="Bug ID that the eval should use",
+    )
+    parser.add_argument(
+        "-g",
+        "--bug_group_id",
+        # default="31fbc1f5-ed37-4c7a-9550-90e9aa77e2e9",
+        default=None,
+        help="Bug group ID that the eval should use",
+    )
     args = parser.parse_args()
 
     # Set up logging based on verbose flag
@@ -200,7 +223,14 @@ def main():
 
     logger.info(f"\nWriting eval results to {args.output}\n")
 
-    data = load_data(eval_file_path=args.input)
+    if args.bug_id:
+        logger.info(f"\nEvaluating on bug_id {args.bug_id}\n")
+        data = load_bug_db(eval_file_path=args.input, bug_id=args.bug_id)
+    elif args.bug_group_id:
+        logger.info(f"\nEvaluating on bug_group_id {args.bug_group_id}\n")
+        data = load_bug_db(eval_file_path=args.input, bug_group_id=args.bug_group_id)
+    else:
+        data = load_data(eval_file_path=args.input)
 
     results = run_eval_pipeline(data, args.model)
 
