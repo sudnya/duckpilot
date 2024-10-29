@@ -1,7 +1,7 @@
 # Base container name
 ARG BASE_NAME=python:3.11
 
-FROM $BASE_NAME as base
+FROM $BASE_NAME AS base
 
 ARG PACKAGE_NAME="duckpilot-coverity"
 
