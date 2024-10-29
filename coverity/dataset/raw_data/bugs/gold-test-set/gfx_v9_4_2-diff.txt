@@ -1,0 +1,24 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c b/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
+index 3f4fd2f..1f612a0 100644
+--- a/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
++++ b/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
+@@ -424,7 +424,9 @@ static void gfx_v9_4_2_log_wave_assignment(struct amdgpu_device *adev, uint32_t
+        char *str;
+        int size;
+
+-       str = kmalloc(256, GFP_KERNEL);
++       int max_size = CU_ID_MAX * SIMD_ID_MAX * WAVE_ID_MAX * 64;
++
++       str = kmalloc(max_size, GFP_KERNEL);
+        if (!str)
+                return;
+
+@@ -432,7 +434,7 @@ static void gfx_v9_4_2_log_wave_assignment(struct amdgpu_device *adev, uint32_t
+
+        for (se = 0; se < adev->gfx.config.max_shader_engines; se++) {
+                for (cu = 0; cu < CU_ID_MAX; cu++) {
+-                       memset(str, 0, 256);
++                       memset(str, 0, max_size);
+                        size = sprintf(str, "SE[%02d]CU[%02d]: ", se, cu);
+                        for (simd = 0; simd < SIMD_ID_MAX; simd++) {
+                                size += sprintf(str + size, "[");

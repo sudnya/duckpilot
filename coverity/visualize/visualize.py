@@ -13,25 +13,25 @@ def load_results(results_jsonlines_path):
 
 
 def visualize_results(results, diff_path):
-   with open(diff_path, "w") as writer:
-       for result in results:
-           writer.write("\n\n\n")
+    with open(diff_path, "w") as writer:
+        for result in results:
+            writer.write("\n\n\n")
 
-           writer.write("========================================\n")
-           writer.write(f"{result['bug_report_text']}\n")
-           writer.write("========================================\n")
+            writer.write("========================================\n")
+            writer.write(f"{result['bug_report_text']}\n")
+            writer.write("========================================\n")
 
-           # Write reference diff section
-           writer.write("============= reference diff =============\n") 
-           writer.write(f"{result['diff_text']}\n")
-           writer.write("========================================\n")
+            # Write reference diff section
+            writer.write("============= reference diff =============\n")
+            writer.write(f"{result['diff_text']}\n")
+            writer.write("========================================\n")
 
-           # Write generated diff section
-           writer.write("============= generated diff =============\n")
-           writer.write(f"{result['generated_diff']}\n")
-           writer.write("========================================\n")
+            # Write generated diff section
+            writer.write("============= generated diff =============\n")
+            writer.write(f"{result['generated_diff']}\n")
+            writer.write("========================================\n")
 
-           writer.write("\n\n\n")
+            writer.write("\n\n\n")
 
 
 def main():

@@ -12,7 +12,7 @@ use the file that you want to run eval on. jsonlines format expected
 diffs that will need to be manually inspected. #TODO: best open src tool to do this easily.
 
 # Step 4: train
-` ➜  coverity git:(sudnya.diff-pilot) ✗ ./train/run.sh -i /app/duckpilot-coverity/dataset/input-perturbed-gold-test-set.jsonlines`
+` ➜  coverity git:(sudnya.diff-pilot) ✗ ./train/run.sh -i /app/duckpilot-coverity/dataset/tuning/inputs/input-perturbed-gold-test-set.jsonlines`
 
 use the file that contains all the examples that you'd like to fine tune the model on
 

@@ -1,0 +1,18 @@
+CID: 1234567
+Type: Buffer overflow
+Category: BUFFER_OVERFLOW
+Classification: Bad use of string function
+Severity: High
+Certainty: Absolute
+Status: New
+Function: amdgpu_atombios_i2c_init
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 150
+
+Issue:
+Unbounded sprintf can cause buffer overflow. The code uses sprintf() without size limits to write into buffer 'stmp', which could lead to buffer overflow if the formatted string exceeds the buffer size.
+
+Description:
+The function amdgpu_atombios_i2c_init() uses sprintf() to format a hexadecimal value into a string buffer 'stmp' without checking if the resulting string will fit in the destination buffer. This could lead to a buffer overflow if i2c.i2c_id generates a string longer than the size of stmp.
+
+Use snprintf instead

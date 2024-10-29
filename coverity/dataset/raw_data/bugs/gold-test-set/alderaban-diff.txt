@@ -1,0 +1,20 @@
+--- a/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -46,11 +46,16 @@ aldebaran_get_reset_handler(struct amdgpu_reset_control *reset_ctl,
+ 			    struct amdgpu_reset_context *reset_context)
+ {
+ 	struct amdgpu_reset_handler *handler;
+-	struct amdgpu_device *adev = (struct amdgpu_device *)reset_ctl->handle;
++	struct amdgpu_device *adev;
+ 	int i;
+
++	if (!reset_ctl || !reset_ctl->handle) {
++		pr_err("Invalid reset control or handle\n");
++		return NULL;
++	}
++
++	adev = (struct amdgpu_device *)reset_ctl->handle;
++
+ 	if (reset_context->method == AMD_RESET_METHOD_NONE) {
+ 		if (aldebaran_is_mode2_default(reset_ctl))
+ 			reset_context->method = AMD_RESET_METHOD_MODE2;

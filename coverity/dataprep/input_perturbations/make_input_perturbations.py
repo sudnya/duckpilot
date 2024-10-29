@@ -4,15 +4,20 @@ import os
 
 
 import logging
+
 logger = logging.getLogger(__name__)
 
+
 # NOTE: this script is currently not used as input perturbations are generated manually
+# TODO: call LLM to generate different "descriptions" instead.
+
+
 def process_jsonlines(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         for line in file:
             try:
                 data = json.loads(line.strip())
-                logger.info(data.get('bug_report_text', 'Bug report text not found'))
+                logger.info(data.get("bug_report_text", "Bug report text not found"))
             except json.JSONDecodeError:
                 logger.error(f"Error decoding JSON: {line}")
 

@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c b/drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c
+index bfd067e2d2f1..6419ab97d922 100644
+--- a/drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c
++++ b/drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c
+@@ -169,7 +169,7 @@ static int vcn_v2_0_sw_init(void *handle)
+        ring->doorbell_index = adev->doorbell_index.vcn.vcn_ring0_1 << 1;
+        ring->vm_hub = AMDGPU_MMHUB0(0);
+
+-       sprintf(ring->name, "vcn_dec");
++       snprintf(ring->name, sizeof(ring->name), "vcn_dec");
+        r = amdgpu_ring_init(adev, ring, 512, &adev->vcn.inst->irq, 0,
+                             AMDGPU_RING_PRIO_DEFAULT, NULL);
+        if (r)

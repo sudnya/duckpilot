@@ -4,6 +4,8 @@ import os
 import argparse
 import logging
 
+##### DEPRECATED!!!! Do not use. Instead call an LLM to generate more training samples.
+
 # Set up logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"

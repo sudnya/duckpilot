@@ -1,0 +1,13 @@
+Issue: Potential Buffer Overflow
+
+CID: 1002
+Severity: High
+Type: Security
+Category: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Function: amdgpu_atombios_copy_swap
+Line: 1627
+
+Description:
+The function amdgpu_atombios_copy_swap uses fixed-size buffers src_tmp and dst_tmp of 5 u32 elements (20 bytes) each. However, it processes num_bytes of data without checking if this exceeds the buffer size. This can lead to a buffer overflow if num_bytes is greater than 20.
+

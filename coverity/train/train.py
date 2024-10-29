@@ -28,7 +28,6 @@ def print_data(data):
 
 
 def get_data(training_data_file, dataset_size=1000):
-
     raw_data = get_raw_data(training_data_file)
 
     data = []
@@ -50,7 +49,6 @@ def get_data(training_data_file, dataset_size=1000):
 
 
 def get_raw_data(training_data_file):
-
     with jsonlines.open(training_data_file) as reader:
         data = list(reader)
 
@@ -128,7 +126,7 @@ def main():
         "-i",
         "--input",
         default="/app/duckpilot-coverity/dataset/tuning/inputs/gold-test-set.jsonlines",
-        help="Path to the input dataset file to evaluate on",
+        help="Path to the input dataset file to tune on",
     )
     args = parser.parse_args()
 

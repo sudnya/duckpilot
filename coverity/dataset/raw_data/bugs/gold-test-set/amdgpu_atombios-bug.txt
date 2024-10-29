@@ -1,0 +1,11 @@
+Issue: Potential Buffer Overflow in sprintf
+
+CID: 1001
+Type: Buffer Overflow
+Severity: High
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 150
+
+Description:
+The function sprintf is used to write to the buffer stmp without any length checking. This could lead to a buffer overflow if the formatted string exceeds the size of stmp.
+

@@ -4,10 +4,9 @@ from lamini.generation.base_prompt_object import PromptObject
 
 import argparse
 from tqdm import tqdm
-
+import csv
 import asyncio
 import jsonlines
-import csv
 import lamini
 import os
 from dotenv import load_dotenv
@@ -26,7 +25,6 @@ logger = logging.getLogger(__name__)
 
 
 def load_data(eval_file_path):
-
     with jsonlines.open(eval_file_path) as reader:
         data = list(reader)
 
@@ -38,7 +36,6 @@ def run_eval_pipeline(data, model_hash):
 
 
 async def eval_pipeline(data, model_hash):
-
     answer_ops = EvalPipeline(model_hash).call(get_data_async(data))
 
     answers = []
@@ -75,9 +72,11 @@ class AnswerGenerator(GenerationNode):
     def postprocess(self, obj: PromptObject):
         logger.info(f"Generated answer for {obj}")
         obj.data["generated_diff"] = obj.response["output"]
+        obj.data["given_prompt"] = obj.prompt
 
     def preprocess(self, obj: PromptObject):
         obj.prompt = self.make_prompt(obj)
+        # print(f"\n\n^^^^^^^^^^^^^^\n\n {obj.prompt}\n\n")
 
     def make_prompt(self, obj: PromptObject):
         # prompt = "<|start_header_id|>user<|end_header_id|>"
@@ -124,6 +123,8 @@ def get_source_code(data):
 
     line_number = data["line_number"]
 
+    assert line_number is not None, data
+
     start_line = max(0, line_number - before_lines)
     end_line = min(len(lines), line_number + after_lines)
 
@@ -150,7 +151,13 @@ def save_results(results, results_path):
     csv_path = f"{base}" + ".csv"
 
     # Select the following column names to be saved in the CSV file
-    columns = ["bug_report_path", "bug_report_text", "diff_text", "generated_diff"]
+    columns = [
+        "bug_report_path",
+        "bug_report_text",
+        "given_prompt",
+        "diff_text",
+        "generated_diff",
+    ]
 
     with open(csv_path, "w") as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=columns)
@@ -186,7 +193,7 @@ def main():
     parser.add_argument(
         "-m",
         "--model",
-        default="c7fbc6924bafd2885ea18a6e109126aecb44530d4cd0a3a0a016b83b3ebd4ce7",
+        default="meta-llama/Meta-Llama-3.1-8B-Instruct",
         help="Model hash that eval should use",
     )
     args = parser.parse_args()
