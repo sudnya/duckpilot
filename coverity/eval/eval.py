@@ -1,7 +1,6 @@
 from lamini.generation.generation_node import GenerationNode
 from lamini.generation.generation_pipeline import GenerationPipeline
 from lamini.generation.base_prompt_object import PromptObject
-from tools.bug_db import BugDatabase
 
 import argparse
 from tqdm import tqdm
@@ -34,6 +33,7 @@ def load_data(eval_file_path):
     return data
 
 
+# TODO(Dulloor): Implement this function
 def load_bug_db(eval_file_path):
 
     with jsonlines.open(eval_file_path) as reader:
