@@ -1,0 +1,11 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -101,6 +101,8 @@ int amdgpu_gem_object_create(struct amdgpu_device *adev, unsigned long size,
+                             struct dma_resv *resv,
+                             struct drm_gem_object **obj, int8_t xcp_id_plus1)
+ {
++       if (!adev || !resv)
++           return VM_FAULT_SIGSEGV;
+        struct amdgpu_bo *bo;
+        struct amdgpu_bo_user *ubo;
+        struct amdgpu_bo_param bp;

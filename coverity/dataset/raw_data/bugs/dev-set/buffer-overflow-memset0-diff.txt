@@ -1,0 +1,21 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
+@@ -460,7 +460,8 @@ static int gfx_v9_4_2_wait_for_waves_assigned(struct amdgpu_device *adev,
+        char *str;
+        int str_size;
+
+-       str = kmalloc(256, GFP_KERNEL);
++       int max_buff_size = CU_ID_MAX * SIMD_ID_MAX * WAVE_ID_MAX * 64;
++       str = kmalloc(max_buff_size, GFP_KERNEL);
+        if (!str)
+                return;
+
+@@ -470,7 +471,7 @@ static int gfx_v9_4_2_wait_for_waves_assigned(struct amdgpu_device *adev,
+
+                for (se = 0; se < adev->gfx.config.max_shader_engines; se++)
+                        for (cu = 0; cu < CU_ID_MAX; cu++) {
+-                               memset(str, 0, 256);
++                               memset(str, 0, max_buff_size);
+                                str_size = sprintf(str, "SE[%02d]CU[%02d]: ", se, cu);
+                                for (simd = 0; simd < SIMD_ID_MAX; simd++) {
+                                        str_size += sprintf(str + str_size, "[");

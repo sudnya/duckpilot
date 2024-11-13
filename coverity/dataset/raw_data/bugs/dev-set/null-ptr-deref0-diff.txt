@@ -1,0 +1,11 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -73,6 +73,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+ static int amdgpu_cs_job_idx(struct amdgpu_cs_parser *p,
+                             struct drm_amdgpu_cs_chunk_ib *chunk_ib)
+ {
++       if (p == NULL || chunk_ib == NULL)
++           return -EINVAL;
+        struct drm_sched_entity *entity;
+        unsigned int i;
+        int r;

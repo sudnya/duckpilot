@@ -1,0 +1,57 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_ras_eeprom.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_ras_eeprom.c
+@@ -494,23 +494,39 @@ __encode_table_record_to_buf(struct amdgpu_ras_eeprom_control *control,
+        int i = 0;
+
+        /* Next are all record fields according to EEPROM page spec in LE foramt */
+-       buf[i++] = record->err_type;
+-
+-       buf[i++] = record->bank;
+-
+-       tmp = cpu_to_le64(record->ts);
+-       memcpy(buf + i, &tmp, 8);
+-       i += 8;
+-
+-       tmp = cpu_to_le64((record->offset & 0xffffffffffff));
+-       memcpy(buf + i, &tmp, 6);
+-       i += 6;
+-
+-       buf[i++] = record->mem_channel;
+-       buf[i++] = record->mcumc_id;
+-
+-       tmp = cpu_to_le64((record->retired_page & 0xffffffffffff));
+-       memcpy(buf + i, &tmp, 6);
++    buf[i++] = record->err_type;
++
++    buf[i++] = record->bank;
++
++    /* Check if there's enough space before each memcpy */
++    tmp = cpu_to_le64(record->ts);
++    if (i + 8 <= BUF_SIZE) {
++        memcpy(buf + i, &tmp, 8);
++        i += 8;
++    } else {
++        // Handle buffer overflow condition here
++        return;
++    }
++
++    tmp = cpu_to_le64((record->offset & 0xffffffffffff));
++    if (i + 6 <= BUF_SIZE) {
++        memcpy(buf + i, &tmp, 6);
++        i += 6;
++    } else {
++        // Handle buffer overflow condition here
++        return;
++    }
++
++    buf[i++] = record->mem_channel;
++    buf[i++] = record->mcumc_id;
++
++    tmp = cpu_to_le64((record->retired_page & 0xffffffffffff));
++    if (i + 6 <= BUF_SIZE) {
++        memcpy(buf + i, &tmp, 6);
++    } else {
++        // Handle buffer overflow condition here
++        return;
++    }
+ }

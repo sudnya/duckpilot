@@ -457,21 +457,34 @@ static int gfx_v9_4_2_wait_for_waves_assigned(struct amdgpu_device *adev,
 	uint32_t loop = 0;
 	uint32_t wave_cnt;
 	uint32_t offset;
+	char *str;
+	int str_size;
 
+	str = kmalloc(256, GFP_KERNEL);
+	if (!str)
+		return;
+	
 	do {
 		wave_cnt = 0;
 		offset = 0;
 
 		for (se = 0; se < adev->gfx.config.max_shader_engines; se++)
-			for (cu = 0; cu < CU_ID_MAX; cu++)
-				for (simd = 0; simd < SIMD_ID_MAX; simd++)
+			for (cu = 0; cu < CU_ID_MAX; cu++) {
+				memset(str, 0, 256);
+				str_size = sprintf(str, "SE[%02d]CU[%02d]: ", se, cu);
+				for (simd = 0; simd < SIMD_ID_MAX; simd++) {
+					str_size += sprintf(str + str_size, "[");
 					for (wave = 0; wave < WAVE_ID_MAX; wave++) {
 						if (((1 << wave) & mask) &&
 						    (wb_ptr[offset] == pattern))
 							wave_cnt++;
 
+						str_size += sprintf(str + str_size, "%x", wb_ptr[offset]);
 						offset++;
 					}
+					str_size += sprintf(str + str_size, "]  ");	
+				}
+			}
 
 		if (wave_cnt == num_wave)
 			return 0;

@@ -1,0 +1,11 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c
+@@ -656,6 +656,8 @@ static bool vi_read_bios_from_rom(struct amdgpu_device *adev,
+        WREG32(mmSMC_IND_DATA_11, 0);
+        /* set index to data for continous read */
+        WREG32(mmSMC_IND_INDEX_11, ixROM_DATA);
++       if (length_dw * 4 > adev->bios_size)
++               return false;
+        for (i = 0; i < length_dw; i++)
+                dw_ptr[i] = RREG32(mmSMC_IND_DATA_11);
+        spin_unlock_irqrestore(&adev->smc_idx_lock, flags);

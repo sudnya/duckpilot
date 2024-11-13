@@ -1,0 +1,10 @@
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_preempt_mgr.c
+
+Line: 69
+
+Function: amdgpu_preempt_mgr_new(
+
+Description: Use of freed memory:
+ *res may have been freed inside of ttm_resource_init
+
+Consider adding a check for NULL.

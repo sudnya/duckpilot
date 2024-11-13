@@ -1,0 +1,7 @@
+Issue: Potential Memory Leak
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+Line: 547
+
+Description:
+The function create_sg_table allocates memory for buffer sg using but does not free this memory in all code paths. The allocated memory is returned to the caller without being freed.
+

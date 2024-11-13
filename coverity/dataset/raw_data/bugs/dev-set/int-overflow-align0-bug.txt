@@ -1,0 +1,11 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
+@@ -156,7 +156,7 @@ bool amdgpu_read_bios(struct amdgpu_device *adev)
+ static bool amdgpu_read_bios_from_rom(struct amdgpu_device *adev)
+ {
+        u8 header[AMD_VBIOS_SIGNATURE_END+1] = {0};
+-       u8 len;
++       u32 len;
+
+        if (!adev->asic_funcs || !adev->asic_funcs->read_bios_from_rom)
+                return false;
