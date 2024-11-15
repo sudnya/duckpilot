@@ -1,11 +1,15 @@
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
-@@ -156,7 +156,7 @@ bool amdgpu_read_bios(struct amdgpu_device *adev)
- static bool amdgpu_read_bios_from_rom(struct amdgpu_device *adev)
- {
-        u8 header[AMD_VBIOS_SIGNATURE_END+1] = {0};
--       u8 len;
-+       u32 len;
+Integer Overflow in amdgpu_read_bios_from_rom
+CID: 2112
 
-        if (!adev->asic_funcs || !adev->asic_funcs->read_bios_from_rom)
-                return false;
+Severity: High
+Type: Integer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 177
+Location: amdgpu_read_bios_from_rom function
+Description
+A potential integer overflow has been detected in the amdgpu_read_bios_from_rom function. 
+The variable len, which is of type u8, is assigned the result of an ALIGN 
+macro operation that can produce values greater than 255 for certain inputs of num_bytes.
+
+len = AMD_VBIOS_LENGTH(header);
+len = ALIGN(len, 4);

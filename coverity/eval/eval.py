@@ -79,8 +79,8 @@ class AnswerGenerator(GenerationNode):
         # print(f"\n\n^^^^^^^^^^^^^^\n\n {obj.prompt}\n\n")
 
     def make_prompt(self, obj: PromptObject):
-        # prompt = "<|start_header_id|>user<|end_header_id|>"
-        prompt = "<s>[INST]"
+        prompt = "<|start_header_id|>user<|end_header_id|>"
+        # prompt = "<s>[INST]"
         prompt += "Consider the following github diff format.\n"
         prompt += "============ Diff format ============\n"
         prompt += "```diff\n"
@@ -106,8 +106,8 @@ class AnswerGenerator(GenerationNode):
         prompt += "Based on the source code and the bug report, write a diff that fixes the bug.\n"
         prompt += "Use github diff format.\n"
         prompt += "Don't explain your diff, answer directly with the diff.\n"
-        # prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-        prompt += "[/INST]"
+        prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+        # prompt += "[/INST]"
 
         return prompt
 

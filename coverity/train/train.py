@@ -37,13 +37,13 @@ def get_data(training_data_file, dataset_size=1000):
         data.append(
             {
                 "input": prompt,
-                # "output": item["diff_text"] + "<|eot_id|>",
-                "output": item["diff_text"] + "</s>",
+                "output": item["diff_text"] + "<|eot_id|>",
+                # "output": item["diff_text"] + "</s>",
             }
         )
 
-    random.seed(42)
-    random.shuffle(data)
+    # random.seed(42)
+    # random.shuffle(data)
 
     return data
 
@@ -56,8 +56,8 @@ def get_raw_data(training_data_file):
 
 
 def make_prompt(item):
-    # prompt = "<|start_header_id|>user<|end_header_id|>"
-    prompt = "<s>[INST]"
+    prompt = "<|start_header_id|>user<|end_header_id|>"
+    # prompt = "<s>[INST]"
     prompt += "Consider the following github diff format.\n"
     prompt += "============ Diff format ============\n"
     prompt += "```diff\n"
@@ -83,8 +83,8 @@ def make_prompt(item):
     prompt += "Based on the source code and the bug report, write a diff that fixes the bug.\n"
     prompt += "Use github diff format.\n"
     prompt += "Don't explain your diff, answer directly with the diff.\n"
-    # prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    prompt += "[/INST]"
+    prompt += "<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
+    # prompt += "[/INST]"
 
     return prompt
 
@@ -144,7 +144,7 @@ def main():
     llm.tune(
         data_or_dataset_id=data,
         finetune_args={
-            "max_steps": 200,
+            "max_steps": 100,
             "learning_rate": 3.0e-4,
             "batch_size": 1,
         },

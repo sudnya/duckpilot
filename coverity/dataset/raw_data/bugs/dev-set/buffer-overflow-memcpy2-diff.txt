@@ -8,11 +8,11 @@
 
         /* Next are all record fields according to EEPROM page spec in LE foramt */
         buf[i++] = record->err_type;
-@@ -499,6 +500,8 @@ __encode_table_record_to_buf(struct amdgpu_ras_eeprom_control *control,
-        buf[i++] = record->bank;
-
-        tmp = cpu_to_le64(record->ts);
-+       if (i + 8 > buf_size)
-+           return -EINVAL;
-        memcpy(buf + i, &tmp, 8);
+@@ -503,6 +504,8 @@ __encode_table_record_to_buf(struct amdgpu_ras_eeprom_control *control,
         i += 8;
+
+        tmp = cpu_to_le64((record->offset & 0xffffffffffff));
++       if (i + 6 > buf_size)
++           return -EINVAL;
+        memcpy(buf + i, &tmp, 6);
+        i += 6;
