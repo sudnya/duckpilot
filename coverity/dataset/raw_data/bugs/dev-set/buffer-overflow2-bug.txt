@@ -1,0 +1,15 @@
+Issue: Potential Buffer Overflow
+
+CID: 1024
+Severity: High
+Type: Security
+Category: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/atombios_dp.c
+Function: amdgpu_atombios_dp_get_dpcd
+Line: 359
+
+Description:
+A potential buffer overflow vulnerability was present in the function amdgpu_atombios_dp_get_dpcd.
+The issue arises from the call to memcpy(dig_connector->dpcd, msg, DP_DPCD_SIZE);, 
+where the size of DP_DPCD_SIZE is not validated against the size of the destination buffer dig_connector->dpcd. 
+If DP_DPCD_SIZE exceeds the size of dig_connector->dpcd, it could result in memory corruption.

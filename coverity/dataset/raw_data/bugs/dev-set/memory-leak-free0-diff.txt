@@ -5,8 +5,8 @@
         sg->sgl->dma_length = size;
  #endif
 +    if (!sg) {
-+               pr_warn("sg table buffer is NULL");
-+               return NULL;
-+       }
-        return sg;
- }
++        pr_warn("sg table buffer is NULL");
++        return NULL;
++    }
+     return sg;
+}

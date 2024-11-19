@@ -5,6 +5,7 @@ from lamini.generation.base_prompt_object import PromptObject
 import argparse
 from tqdm import tqdm
 import csv
+import constants as constval
 import asyncio
 import jsonlines
 import lamini
@@ -103,6 +104,9 @@ class AnswerGenerator(GenerationNode):
         prompt += "============ Bug Report ============\n"
         prompt += obj.data["bug_report_text"]
         prompt += "====================================\n"
+        # prompt += "Here is the function signature.\n"
+        # prompt += obj.data["function_signature"]
+        # prompt += "Ensure the return types in fix are correct."
         prompt += "Based on the source code and the bug report, write a diff that fixes the bug.\n"
         prompt += "Use github diff format.\n"
         prompt += "Don't explain your diff, answer directly with the diff.\n"
@@ -114,8 +118,8 @@ class AnswerGenerator(GenerationNode):
 
 def get_source_code(data):
     # Before and after lines to show
-    before_lines = 5
-    after_lines = 5
+    before_lines = constval.LINES_BEFORE  # 5
+    after_lines = constval.LINES_AFTER  # 5
 
     source_code = data["code"]
 

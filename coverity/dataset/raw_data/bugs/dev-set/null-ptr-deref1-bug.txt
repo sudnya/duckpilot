@@ -8,6 +8,6 @@ Impact:     High
 
 Description:
 ------------
-A potential null pointer dereference issue has been identified in the `amdgpu_gem_object_create` function. If the `amdgpu_device *adev` or `dma_resv *resv,` is NULL, accessing members of these structures without validation may lead to 
-undefined behavior and potential system instability.
+The function dereferences the pointer adev and resv without first checking if they are NULL. 
+If either pointer is NULL, dereferencing them (e.g. adev->dev or resv->lock) will cause a crash.
 

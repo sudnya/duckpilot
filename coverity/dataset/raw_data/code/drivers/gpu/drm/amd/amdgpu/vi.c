@@ -637,7 +637,7 @@ static bool vi_read_bios_from_rom(struct amdgpu_device *adev,
 {
 	u32 *dw_ptr;
 	unsigned long flags;
-	u32 i, length_dw;
+	u32 i;
 
 	if (bios == NULL)
 		return false;
@@ -648,7 +648,7 @@ static bool vi_read_bios_from_rom(struct amdgpu_device *adev,
 		return false;
 
 	dw_ptr = (u32 *)bios;
-	length_dw = ALIGN(length_bytes, 4) / 4;
+	u8 length_dw = ALIGN(length_bytes, 4);
 	/* take the smc lock since we are using the smc index */
 	spin_lock_irqsave(&adev->smc_idx_lock, flags);
 	/* set rom index to 0 */

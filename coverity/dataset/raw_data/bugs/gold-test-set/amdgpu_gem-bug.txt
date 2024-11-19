@@ -4,7 +4,6 @@ Function: amdgpu_gem_fault
 Line: 50
 
 Description:
-  The function 'amdgpu_gem_fault' takes a pointer parameter 'vmf' of type 'struct vm_fault *'.
-  This pointer and its member 'vma' are dereferenced (struct ttm_buffer_object *bo = vmf->vma->vm_private_data;) without first checking if they are null.
-  If 'vmf' or 'vmf->vma' is null, this will result in a null pointer dereference.
-
+  The function 'amdgpu_gem_fault' takes a pointer parameter 'vmf'.
+  This pointer and its member 'vma' are dereferenced  without first checking if they are null. 
+  If 'vmf' or its members are null, this will result in a null pointer dereference.

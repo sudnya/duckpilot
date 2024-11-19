@@ -1,17 +1,15 @@
-diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
-index 375f02002579..0e717d89b3e7 100644
---- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
-+++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
-@@ -144,7 +144,13 @@ static union acpi_object *amdgpu_atpx_call(acpi_handle handle, int function,
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
+index 375f020..c5c86d9 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
+@@ -144,7 +144,10 @@ static union acpi_object *amdgpu_atpx_call(acpi_handle handle, int function,
                 kfree(buffer.pointer);
                 return NULL;
         }
-+   /* If status is AE_NOT_FOUND, buffer.pointer will be NULL */
-+   if (!buffer.pointer) {
-+       pr_warn("ATPX buffer is NULL\n");
-+       return NULL;
-+   }
-
-+   /* Caller must free the returned buffer */
+-
++       if (!buffer.pointer) {
++           pr_warn("ATPX buffer is NULL\n");
++           return NULL;
++       }
         return buffer.pointer;
- }
+}

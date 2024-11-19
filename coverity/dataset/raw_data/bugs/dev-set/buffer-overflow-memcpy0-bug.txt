@@ -8,4 +8,3 @@ Description: Potential buffer overflow in memcpy() operation
 There is a potential buffer overflow in the call to memcpy(). The size argument
 to memcpy() is derived from untrusted input (info->buffer.pointer) and may exceed
 the size of the destination buffer.
-

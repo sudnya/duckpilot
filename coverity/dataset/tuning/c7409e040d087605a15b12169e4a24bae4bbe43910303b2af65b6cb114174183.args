@@ -1,0 +1,27 @@
+{
+	"finetune_args": {
+		"save_steps": 60,
+		"max_steps": 100,
+		"index_max_size": 65536,
+		"index_k": 2,
+		"batch_size": 1,
+		"r_value": 64,
+		"index_hnsw_m": 32,
+		"index_method": "IndexIVFPQ",
+		"learning_rate": 0.0003,
+		"max_length": 2048,
+		"optim": "adafactor",
+		"eval_steps": 30,
+		"index_hnsw_efSearch": 8,
+		"index_pq_nbits": 8,
+		"index_ivf_nprobe": 48,
+		"index_hnsw_efConstruction": 16,
+		"index_pq_m": 8,
+		"index_ivf_nlist": 2048
+	},
+	"gpu_config": {
+		"gpus": 1,
+		"nodes": 1
+	},
+	"custom_model_name": null
+}

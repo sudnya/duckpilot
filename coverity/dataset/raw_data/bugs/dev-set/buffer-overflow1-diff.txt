@@ -1,0 +1,13 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c
+index d28d6b9..00851a4 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/vi.c
+@@ -648,7 +648,7 @@ static bool vi_read_bios_from_rom(struct amdgpu_device *adev,
+                return false;
+
+        dw_ptr = (u32 *)bios;
+-       u8 length_dw = ALIGN(length_bytes, 4);
++       u32 length_dw = ALIGN(length_bytes, 4);
+        /* take the smc lock since we are using the smc index */
+        spin_lock_irqsave(&adev->smc_idx_lock, flags);
+        /* set rom index to 0 */
