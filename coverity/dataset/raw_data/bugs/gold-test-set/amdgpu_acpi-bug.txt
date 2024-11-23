@@ -1,11 +1,7 @@
 Type: BUFFER_OVERFLOW
 File: drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
 Function: amdgpu_atif_verify_interface
-Line: 256
+Line: 255
 
 Description: Potential buffer overflow in memcpy() operation
-
-There is a potential buffer overflow in the call to memcpy(). The size argument
-to memcpy() is derived from untrusted input (info->buffer.pointer) and may exceed
-the size of the destination buffer.
-
+In amdgpu_atif_verify_interface, the size of the data to copy is read from info->buffer.pointer and directly used in a memcpy. If size of input->buffer.pointer exceeds the destination buffer (output), it can cause a buffer overflow. Before memcpy, add a check to ensure that output buffer is less than input->buffer.pointer.

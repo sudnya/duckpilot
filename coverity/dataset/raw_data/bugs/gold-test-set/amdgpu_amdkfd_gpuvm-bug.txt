@@ -4,7 +4,5 @@ Line: 2469
 
 Function: amdgpu_amdkfd_gpuvm_import_dmabuf_fd
 
-Description: Use of freed memory:
- *mem may have been freed inside of import_obj_create.
-
-Consider adding a check for NULL.
+Description: 
+*mem is dereferenced without a null check in (*mem)->gem_handle = handle. Add a null check.
