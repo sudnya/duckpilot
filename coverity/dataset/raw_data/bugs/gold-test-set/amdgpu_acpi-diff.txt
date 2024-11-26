@@ -7,7 +7,7 @@ index f85ace0..fdfdd21 100644
 
         size = *(u16 *) info->buffer.pointer;
 -       if (size < 12) {
-+       if (size < 12 || sizeof(output) >= sizeof(info->buffer.pointer)) {
++       if (size < 12 || sizeof(output) < sizeof(info->buffer.pointer)) {
                 DRM_INFO("ATIF buffer is too small: %zu\n", size);
                 err = -EINVAL;
                 goto out;

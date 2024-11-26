@@ -2,6 +2,262 @@
 
 
 ========================================
+Issue: Lack of Boundary Checks
+Type: BUFFER_OVERFLOW
+File: drivers/gpu/drm/amd/amdgpu/si.c
+Line: 1324
+
+Description:
+The function si_read_bios_from_rom lacks proper boundary checks when reading data into the bios buffer. 
+The function calculates the number of dwords to read based on the input length_bytes, but it doesn't verify 
+if this calculated length exceeds the actual allocated size of the bios buffer. 
+This can lead to a buffer overflow, potentially causing memory corruption or security vulnerabilities.
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/si.c b/drivers/gpu/drm/amd/amdgpu/si.c
+index 8523547..c64b7ac 100644
+--- a/drivers/gpu/drm/amd/amdgpu/si.c
++++ b/drivers/gpu/drm/amd/amdgpu/si.c
+@@ -1319,6 +1319,8 @@ static bool si_read_bios_from_rom(struct amdgpu_device *adev,
+
+        dw_ptr = (u32 *)bios;
+        length_dw = ALIGN(length_bytes, 4) / 4;
++       if (length_dw * 4 > adev->bios_size)
++               return false;
+        /* set rom index to 0 */
+        WREG32(mmROM_INDEX, 0);
+        for (i = 0; i < length_dw; i++)
+
+========================================
+============= generated diff =============
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/si.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/si.c
+@@ -1321,6 +1321,8 @@ static bool si_read_bios_from_rom(struct amdgpu_device *adev,
+        length_dw = ALIGN(length_bytes, 4) / 4;
+        /* set rom index to 0 */
+        WREG32(mmROM_INDEX, 0);
++       if (length_dw * 4 > adev->bios_size)
++               return false;
+        for (i = 0; i < length_dw; i++)
+                dw_ptr[i] = RREG32(mmROM_DATA);
+
+        return true;
+========================================
+
+
+
+
+
+
+========================================
+Issue: Potential Buffer Overflow
+
+CID: 1002
+Severity: High
+Type: Security
+Category: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Function: amdgpu_atombios_copy_swap
+Line: 1630
+
+Description:
+A potential buffer overflow vulnerability exists because the code performs a memcpy operation without verifying if the num_bytes parameter exceeds the allocated size of the src_tmp buffer. When num_bytes is larger than src_tmp's capacity, the memcpy will write beyond the buffer's bounds.
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index 0c8975ac5af9..300e5d19a9e6 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -1625,6 +1625,9 @@ void amdgpu_atombios_copy_swap(u8 *dst, u8 *src, u8 num_bytes, bool to_le)
+        u32 src_tmp[5], dst_tmp[5];
+        int i;
+        u8 align_num_bytes = ALIGN(num_bytes, 4);
++       if (align_num_bytes > sizeof(src_tmp)) {
++        return;
++    }
+
+        if (to_le) {
+                memcpy(src_tmp, src, num_bytes);
+
+========================================
+============= generated diff =============
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -1627,6 +1627,8 @@ static int amdgpu_atombios_copy_swap(uint8_t *src, uint8_t *dst, uint32_t num_bytes,
+        u8 align_num_bytes = ALIGN(num_bytes, 4);
+
+        if (to_le) {
++               if (num_bytes > sizeof(src_tmp))
++                       return;
+                memcpy(src_tmp, src, num_bytes);
+                for (i = 0; i < align_num_bytes / 4; i++)
+                        dst_tmp[i] = cpu_to_le32(src_tmp[i]);
+                memcpy(dst, dst_tmp, align_num_bytes);
+        } else {
+                memcpy(src_tmp, src, align_num_bytes);
+                for (i = 0; i < (num_bytes + 3) / 4; i++)
+                        dst[i] = dst_tmp[i] = cpu_to_le32(src_tmp[i]);
+        }
+        return 0;
+ }
+========================================
+
+
+
+
+
+
+========================================
+Type: BUFFER_OVERFLOW
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+Function: amdgpu_atif_verify_interface
+Line: 255
+
+Description: Potential buffer overflow in memcpy() operation
+In amdgpu_atif_verify_interface, the size of the data to copy is read from info->buffer.pointer and directly used in a memcpy. If size of input->buffer.pointer exceeds the destination buffer (output), it can cause a buffer overflow. Before memcpy, add a check to ensure that output buffer is less than input->buffer.pointer.
+========================================
+============= reference diff =============
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+index f85ace0..fdfdd21 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+@@ -246,7 +246,7 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
+        memset(&output, 0, sizeof(output));
+
+        size = *(u16 *) info->buffer.pointer;
+-       if (size < 12) {
++       if (size < 12 || sizeof(output) < sizeof(info->buffer.pointer)) {
+                DRM_INFO("ATIF buffer is too small: %zu\n", size);
+                err = -EINVAL;
+                goto out;
+========================================
+============= generated diff =============
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+@@ -252,6 +252,10 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
+
+        err = -EINVAL;
+        goto out;
++   if (sizeof(output) < size) {
++       err = -EINVAL;
++       goto out;
++   }
+        size = min(sizeof(output), size);
+
+        memcpy(&output, info->buffer.pointer, size);
+========================================
+
+
+
+
+
+
+========================================
+Issue: Null Pointer Dereference
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+Function: amdgpu_cs_parser_init
+Line: 51
+
+Description:
+The function 'amdgpu_cs_parser_init' dereferences 'cs' without first checking if it is NULL. This can lead to a null pointer dereference if 'cs' is NULL when the function is called.
+Code Path:
+
+Function 'amdgpu_cs_parser_init' is called with 'cs' as an argument
+'cs' is dereferenced at line 51 without a NULL check: if (cs->in.num_chunks == 0)
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 1e475eb01417..d3db17084e3d 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -46,6 +46,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+                                 struct drm_file *filp,
+                                 union drm_amdgpu_cs *cs)
+ {
++       if (cs == NULL)
++               return -EINVAL;
+        struct amdgpu_fpriv *fpriv = filp->driver_priv;
+
+        if (cs->in.num_chunks == 0)
+
+========================================
+============= generated diff =============
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -48,6 +48,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+                             struct amdgpu_cs_parser *p,
+                             struct amdgpu_cs_parser_param *param,
+                             struct drm_amdgpu_cs *cs)
++       {
++       if (!cs) return -EINVAL;
+        struct amdgpu_fpriv *fpriv = param->filp->driver_priv;
+
+        if (cs->in.num_chunks == 0)
+========================================
+
+
+
+
+
+
+========================================
+Issue: Potential Buffer Overflow in sprintf
+
+CID: 1001
+Type: Buffer Overflow
+Severity: High
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 150
+
+Description:
+The function sprintf is used to write to the buffer stmp without any length checking. This could lead to a buffer overflow if the formatted string exceeds the size of stmp.
+
+
+========================================
+============= reference diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index 0c8975ac5af9..e215b5e2d183 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -147,7 +147,7 @@ void amdgpu_atombios_i2c_init(struct amdgpu_device *adev)
+                        i2c = amdgpu_atombios_get_bus_rec_for_i2c_gpio(gpio);
+
+                        if (i2c.valid) {
+-                               sprintf(stmp, "0x%x", i2c.i2c_id);
++                               snprintf(stmp, sizeof(stmp), "0x%x", i2c.i2c_id);
+                                adev->i2c_bus[i] = amdgpu_i2c_create(adev_to_drm(adev), &i2c, stmp);
+                        }
+                        gpio = (ATOM_GPIO_I2C_ASSIGMENT *)
+
+========================================
+============= generated diff =============
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index f85ace0384d2..10dfa3a37333 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -147,7 +147,7 @@ void amdgpu_atombios_i2c_init(struct amdgpu_device *adev)
+                        i2c = amdgpu_atombios_get_bus_rec_for_i2c_gpio(gpio);
+
+                        if (i2c.valid) {
+-                               sprintf(stmp, "0x%x", i2c.i2c_id);
++                               snprintf(stmp, sizeof(stmp) "0x%x", i2c.i2c_id);
+                                adev->i2c_bus[i] = amdgpu_i2c_create(adev_to_drm(adev), &i2c, stmp);
+                        }
+                        gpio = (ATOM_GPIO_I2C_ASSIGMENT *)
+========================================
+
+
+
+
+
+
+========================================
 File: drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
 
 Line: 2469
@@ -354,263 +610,6 @@ index d28d6b9..00851a4 100644
         /* take the smc lock since we are using the smc index */
         spin_lock_irqsave(&adev->smc_idx_lock, flags);
         /* set rom index to 0 */
-========================================
-
-
-
-
-
-
-========================================
-Issue: Lack of Boundary Checks
-Type: BUFFER_OVERFLOW
-File: drivers/gpu/drm/amd/amdgpu/si.c
-Line: 1324
-
-Description:
-The function si_read_bios_from_rom lacks proper boundary checks when reading data into the bios buffer. 
-The function calculates the number of dwords to read based on the input length_bytes, but it doesn't verify 
-if this calculated length exceeds the actual allocated size of the bios buffer. 
-This can lead to a buffer overflow, potentially causing memory corruption or security vulnerabilities.
-
-
-========================================
-============= reference diff =============
-diff --git a/drivers/gpu/drm/amd/amdgpu/si.c b/drivers/gpu/drm/amd/amdgpu/si.c
-index 8523547..c64b7ac 100644
---- a/drivers/gpu/drm/amd/amdgpu/si.c
-+++ b/drivers/gpu/drm/amd/amdgpu/si.c
-@@ -1319,6 +1319,8 @@ static bool si_read_bios_from_rom(struct amdgpu_device *adev,
-
-        dw_ptr = (u32 *)bios;
-        length_dw = ALIGN(length_bytes, 4) / 4;
-+       if (length_dw * 4 > adev->bios_size)
-+               return false;
-        /* set rom index to 0 */
-        WREG32(mmROM_INDEX, 0);
-        for (i = 0; i < length_dw; i++)
-
-========================================
-============= generated diff =============
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/si.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/si.c
-@@ -1321,6 +1321,8 @@ static bool si_read_bios_from_rom(struct amdgpu_device *adev,
-        length_dw = ALIGN(length_bytes, 4) / 4;
-        /* set rom index to 0 */
-        WREG32(mmROM_INDEX, 0);
-+       if (length_dw * 4 > adev->bios_size)
-+               return false;
-        for (i = 0; i < length_dw; i++)
-                dw_ptr[i] = RREG32(mmROM_DATA);
-
-        return true;
-========================================
-
-
-
-
-
-
-========================================
-Issue: Potential Buffer Overflow
-
-CID: 1002
-Severity: High
-Type: Security
-Category: Buffer Overflow
-File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-Function: amdgpu_atombios_copy_swap
-Line: 1630
-
-Description:
-A potential buffer overflow vulnerability exists because the code performs a memcpy operation without verifying if the num_bytes parameter exceeds the allocated size of the src_tmp buffer. When num_bytes is larger than src_tmp's capacity, the memcpy will write beyond the buffer's bounds. Do not change the function signature.
-
-
-========================================
-============= reference diff =============
-diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-index 0c8975ac5af9..300e5d19a9e6 100644
---- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-+++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-@@ -1625,6 +1625,9 @@ void amdgpu_atombios_copy_swap(u8 *dst, u8 *src, u8 num_bytes, bool to_le)
-        u32 src_tmp[5], dst_tmp[5];
-        int i;
-        u8 align_num_bytes = ALIGN(num_bytes, 4);
-+       if (align_num_bytes > sizeof(src_tmp)) {
-+        return;
-+    }
-
-        if (to_le) {
-                memcpy(src_tmp, src, num_bytes);
-
-========================================
-============= generated diff =============
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-@@ -1627,6 +1627,8 @@ static int amdgpu_atombios_copy_swap(uint8_t *src, uint8_t *dst, uint32_t num_bytes,
-        u8 align_num_bytes = ALIGN(num_bytes, 4);
-
-        if (to_le) {
-+               if (num_bytes > sizeof(src_tmp))
-+                       return;
-                memcpy(src_tmp, src, num_bytes);
-                for (i = 0; i < align_num_bytes / 4; i++)
-                        dst_tmp[i] = cpu_to_le32(src_tmp[i]);
-                memcpy(dst, dst_tmp, align_num_bytes);
-        } else {
-                memcpy(src_tmp, src, align_num_bytes);
-                for (i = 0; i < num_bytes / 4; i++)
-                        dst_tmp[i] = cpu_to_le32(src_tmp[i]);
-                memcpy(dst, dst_tmp, num_bytes);
-        }
-        return 0;
- }
-========================================
-
-
-
-
-
-
-========================================
-Type: BUFFER_OVERFLOW
-File: drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-Function: amdgpu_atif_verify_interface
-Line: 255
-
-Description: Potential buffer overflow in memcpy() operation
-In amdgpu_atif_verify_interface, the size of the data to copy is read from info->buffer.pointer and directly used in a memcpy. If size of input->buffer.pointer exceeds the destination buffer (output), it can cause a buffer overflow. Before memcpy, add a check to ensure that output buffer is less than input->buffer.pointer.
-========================================
-============= reference diff =============
-diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-index f85ace0..fdfdd21 100644
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-@@ -246,7 +246,7 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
-        memset(&output, 0, sizeof(output));
-
-        size = *(u16 *) info->buffer.pointer;
--       if (size < 12) {
-+       if (size < 12 || sizeof(output) >= sizeof(info->buffer.pointer)) {
-                DRM_INFO("ATIF buffer is too small: %zu\n", size);
-                err = -EINVAL;
-                goto out;
-========================================
-============= generated diff =============
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
-@@ -252,6 +252,10 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
-
-        err = -EINVAL;
-        goto out;
-+   if (sizeof(output) < size) {
-+       err = -EINVAL;
-+       goto out;
-+   }
-        size = min(sizeof(output), size);
-
-        memcpy(&output, info->buffer.pointer, size);
-========================================
-
-
-
-
-
-
-========================================
-Issue: Null Pointer Dereference
-File: drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-Function: amdgpu_cs_parser_init
-Line: 51
-
-Description:
-The function 'amdgpu_cs_parser_init' dereferences 'cs' without first checking if it is NULL. This can lead to a null pointer dereference if 'cs' is NULL when the function is called.
-Code Path:
-
-Function 'amdgpu_cs_parser_init' is called with 'cs' as an argument
-'cs' is dereferenced at line 51 without a NULL check: if (cs->in.num_chunks == 0)
-
-
-========================================
-============= reference diff =============
-diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-index 1e475eb01417..d3db17084e3d 100644
---- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-+++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-@@ -46,6 +46,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
-                                 struct drm_file *filp,
-                                 union drm_amdgpu_cs *cs)
- {
-+       if (cs == NULL)
-+               return -EINVAL;
-        struct amdgpu_fpriv *fpriv = filp->driver_priv;
-
-        if (cs->in.num_chunks == 0)
-
-========================================
-============= generated diff =============
---- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-+++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-@@ -48,6 +48,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
-                             struct amdgpu_cs_parser *p,
-                             struct amdgpu_cs_parser_param *param,
-                             struct drm_amdgpu_cs *cs)
-+       {
-+       if (!cs) return -EINVAL;
-        struct amdgpu_fpriv *fpriv = param->filp->driver_priv;
-
-        if (cs->in.num_chunks == 0)
-========================================
-
-
-
-
-
-
-========================================
-Issue: Potential Buffer Overflow in sprintf
-
-CID: 1001
-Type: Buffer Overflow
-Severity: High
-File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-Line: 150
-
-Description:
-The function sprintf is used to write to the buffer stmp without any length checking. This could lead to a buffer overflow if the formatted string exceeds the size of stmp.
-
-
-========================================
-============= reference diff =============
-diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-index 0c8975ac5af9..e215b5e2d183 100644
---- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-+++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-@@ -147,7 +147,7 @@ void amdgpu_atombios_i2c_init(struct amdgpu_device *adev)
-                        i2c = amdgpu_atombios_get_bus_rec_for_i2c_gpio(gpio);
-
-                        if (i2c.valid) {
--                               sprintf(stmp, "0x%x", i2c.i2c_id);
-+                               snprintf(stmp, sizeof(stmp), "0x%x", i2c.i2c_id);
-                                adev->i2c_bus[i] = amdgpu_i2c_create(adev_to_drm(adev), &i2c, stmp);
-                        }
-                        gpio = (ATOM_GPIO_I2C_ASSIGMENT *)
-
-========================================
-============= generated diff =============
-diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-index f85ace0384d2..10dfa3a37333 100644
---- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-+++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
-@@ -147,7 +147,7 @@ void amdgpu_atombios_i2c_init(struct amdgpu_device *adev)
-                        i2c = amdgpu_atombios_get_bus_rec_for_i2c_gpio(gpio);
-
-                        if (i2c.valid) {
--                               sprintf(stmp, "0x%x", i2c.i2c_id);
-+                               snprintf(stmp, sizeof(stmp) "0x%x", i2c.i2c_id);
-                                adev->i2c_bus[i] = amdgpu_i2c_create(adev_to_drm(adev), &i2c, stmp);
-                        }
-                        gpio = (ATOM_GPIO_I2C_ASSIGMENT *)
 ========================================
 
 
