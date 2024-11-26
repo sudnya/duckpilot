@@ -1,10 +1,7 @@
 # Import required libraries
 import argparse  # For parsing command-line arguments
 import requests  # For making HTTP requests
-
-# from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT  # Anthropic API client and constants
 import anthropic
-
 
 def get_api_key(client_type):
     import json
@@ -49,16 +46,16 @@ def download_code_snippet(url):
 
 def call_claude_api(api_key, content, user_prompt):
     """
-        Call the Claude API with the given content and user prompt.
+    Call the Claude API with the given content and user prompt.
 
-        Args:
-        api_key (str): The Anthropic API key.
-        content (str): The code snippet content.
-        user_prompt (str): The user's instruction for Claude.
+    Args:
+    api_key (str): The Anthropic API key.
+    content (str): The code snippet content.
+    user_prompt (str): The user's instruction for Claude.
 
-        Returns:
-        str or None: Claude's response if successful, None otherwise.
-        message = client.messages.create(
+    Returns:
+    str or None: Claude's response if successful, None otherwise.
+    message = client.messages.create(
     model="claude-3-opus-20240229",
     max_tokens=1000,
     temperature=0,
