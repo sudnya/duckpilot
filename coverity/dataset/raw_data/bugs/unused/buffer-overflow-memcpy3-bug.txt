@@ -1,0 +1,25 @@
+Issue Type: BUFFER_OVERFLOW
+Severity: High
+CID: BUFFER_OVERFLOW_MEMCPY
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_ras_eeprom.c
+Status: New
+Impact: High
+Finder: Coverity Static Analysis
+Line: 513
+
+
+Description
+Buffer overflow in __encode_table_record_to_buf() due to unchecked buffer boundaries before memory operations. 
+The function performs write to a buffer without size validation, potentially leading to out-of-bounds memory access.
+
+-> Function: __encode_table_record_to_buf
+    memcpy(buf + i, &tmp, 6)
+   * No buffer size validation before memory operation
+
+Events
+
+Function receives unconstrained buffer pointer
+No size parameter is provided
+Multiple memcpy operations performed without bounds checking
+Total write operations exceed potential buffer size
+No error handling for buffer overflow conditions

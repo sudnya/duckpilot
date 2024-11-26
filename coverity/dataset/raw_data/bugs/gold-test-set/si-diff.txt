@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/si.c b/drivers/gpu/drm/amd/amdgpu/si.c
+index 8523547..c64b7ac 100644
+--- a/drivers/gpu/drm/amd/amdgpu/si.c
++++ b/drivers/gpu/drm/amd/amdgpu/si.c
+@@ -1319,6 +1319,8 @@ static bool si_read_bios_from_rom(struct amdgpu_device *adev,
+
+        dw_ptr = (u32 *)bios;
+        length_dw = ALIGN(length_bytes, 4) / 4;
++       if (length_dw * 4 > adev->bios_size)
++               return false;
+        /* set rom index to 0 */
+        WREG32(mmROM_INDEX, 0);
+        for (i = 0; i < length_dw; i++)

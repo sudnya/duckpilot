@@ -1,0 +1,9 @@
+Issue: Potential Memory Leak
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
+Line: 148
+
+Description:
+The function amdgpu_atpx_call allocates memory for buffer.pointer using ACPI_ALLOCATE_BUFFER, 
+but does not free this memory in all code paths. Specifically, when the function succeeds 
+(i.e., when acpi_evaluate_object does not fail), the allocated memory is returned to the caller without being freed.
+

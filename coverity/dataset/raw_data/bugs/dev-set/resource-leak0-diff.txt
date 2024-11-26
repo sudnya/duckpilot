@@ -1,0 +1,9 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -233,6 +233,7 @@ static int amdgpu_cs_pass1(struct amdgpu_cs_parser *p,
+                size *= sizeof(uint32_t);
+                if (copy_from_user(p->chunks[i].kdata, cdata, size)) {
+                        ret = -EFAULT;
++                       i--;
+                        goto free_partial_kdata;
+                }

@@ -1,0 +1,10 @@
+Type: BUFFER_OVERFLOW
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+Function: amdgpu_atif_get_notification_params
+Line: 303
+
+Description: Potential buffer overflow in memcpy() operation
+
+There is a potential buffer overflow in the call to memcpy(). The size argument
+to memcpy() is derived from untrusted input (info->buffer.pointer) and may exceed
+the size of the destination buffer.

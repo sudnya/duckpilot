@@ -1,0 +1,12 @@
+CID: 10000
+Classification: NULL_RETURNS
+Function: aldebaran_mode2_prepare_hwcontext 
+File: drivers/gpu/drm/amd/amdgpu/aldebaran.c
+Line: 108
+
+Description:
+The function 'aldebaran_mode2_prepare_hwcontext' dereferences 'reset_ctl->handle' without first 
+checking if 'reset_ctl' or 'reset_ctl->handle' is NULL. This could lead to a null pointer dereference 
+if either 'reset_ctl' or 'reset_ctl->handle' is NULL when the function is called.
+
+

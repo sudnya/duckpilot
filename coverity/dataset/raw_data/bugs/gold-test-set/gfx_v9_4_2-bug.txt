@@ -1,0 +1,9 @@
+Issue: Potential Buffer Overflow in Wave Assignment Logging
+Type: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
+Line: 427
+
+Description:
+A potential buffer overflow has been detected in the function gfx_v9_4_2_log_wave_assignment(). 
+The function uses a fixed-size buffer of 256 bytes to store a formatted string, but does not implement proper bounds checking. 
+This could lead to a buffer overflow if the accumulated string length exceeds the allocated buffer size.

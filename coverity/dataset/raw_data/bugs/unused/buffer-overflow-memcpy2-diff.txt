@@ -1,0 +1,18 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_ras_eeprom.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_ras_eeprom.c
+@@ -492,6 +492,7 @@ __encode_table_record_to_buf(struct amdgpu_ras_eeprom_control *control,
+ {
+        __le64 tmp = 0;
+        int i = 0;
++       int buf_size = 24; // Total size required for the buffer.
+
+        /* Next are all record fields according to EEPROM page spec in LE foramt */
+        buf[i++] = record->err_type;
+@@ -503,6 +504,8 @@ __encode_table_record_to_buf(struct amdgpu_ras_eeprom_control *control,
+        i += 8;
+
+        tmp = cpu_to_le64((record->offset & 0xffffffffffff));
++       if (i + 6 > buf_size)
++           return -EINVAL;
+        memcpy(buf + i, &tmp, 6);
+        i += 6;

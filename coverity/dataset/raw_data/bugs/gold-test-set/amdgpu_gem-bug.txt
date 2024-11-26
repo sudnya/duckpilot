@@ -1,0 +1,7 @@
+Type: Null pointer dereferences
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+Function: amdgpu_gem_fault
+Line: 50
+
+Description:
+The amdgpu_gem_fault function dereferences the pointer parameter vmf and its members (vmf->vma and vmf->vma->vm_private_data) without first verifying they are non-null. This can result in undefined behavior if any of these pointers are null. Add explicit null checks for vmf, vmf->vma, and vmf->vma->vm_private_data before attempting to access or assign to the bo variable.

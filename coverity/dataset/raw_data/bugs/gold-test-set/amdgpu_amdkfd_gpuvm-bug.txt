@@ -1,0 +1,8 @@
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+
+Line: 2469
+
+Function: amdgpu_amdkfd_gpuvm_import_dmabuf_fd
+
+Description: 
+*mem is dereferenced without a null check in (*mem)->gem_handle = handle. Add a null check.

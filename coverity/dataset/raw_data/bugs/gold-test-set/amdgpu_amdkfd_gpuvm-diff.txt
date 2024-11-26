@@ -1,0 +1,12 @@
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+@@ -2461,7 +2461,9 @@ int amdgpu_amdkfd_gpuvm_import_dmabuf_fd(struct amdgpu_device *adev, int fd,
+        if (ret)
+                goto err_put_obj;
+
+-       (*mem)->gem_handle = handle;
++    if (*mem) {
++           (*mem)->gem_handle = handle;
++    }
+
+        return 0;

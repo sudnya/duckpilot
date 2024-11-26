@@ -1,0 +1,25 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
+index 42e64bc..095048b 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_bios.c
+@@ -156,7 +156,6 @@ bool amdgpu_read_bios(struct amdgpu_device *adev)
+ static bool amdgpu_read_bios_from_rom(struct amdgpu_device *adev)
+ {
+        u8 header[AMD_VBIOS_SIGNATURE_END+1] = {0};
+-       int len;
+
+        if (!adev->asic_funcs || !adev->asic_funcs->read_bios_from_rom)
+                return false;
+@@ -173,8 +172,12 @@ static bool amdgpu_read_bios_from_rom(struct amdgpu_device *adev)
+                return false;
+
+        /* valid vbios, go on */
++       size_t len;
+        len = AMD_VBIOS_LENGTH(header);
+        len = ALIGN(len, 4);
++       if (len ==0 || len > MAX_BIOS_SIZE) {
++               return false;
++       }
+        adev->bios = kmalloc(len, GFP_KERNEL);
+        if (!adev->bios) {
+                DRM_ERROR("no memory to allocate for BIOS\n");

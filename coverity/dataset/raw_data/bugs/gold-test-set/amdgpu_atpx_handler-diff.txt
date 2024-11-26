@@ -1,0 +1,15 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
+index 375f020..c5c86d9 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_atpx_handler.c
+@@ -144,7 +144,10 @@ static union acpi_object *amdgpu_atpx_call(acpi_handle handle, int function,
+                kfree(buffer.pointer);
+                return NULL;
+        }
+-
++       if (!buffer.pointer) {
++           pr_warn("ATPX buffer is NULL\n");
++           return NULL;
++       }
+        return buffer.pointer;
+}

@@ -1,0 +1,13 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+index b0f95a7..3c12e3b 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -47,6 +47,9 @@ aldebaran_get_reset_handler(struct amdgpu_reset_control *reset_ctl,
+                            struct amdgpu_reset_context *reset_context)
+ {
+        struct amdgpu_reset_handler *handler;
++       if (!reset_ctl || !reset_ctl->handle) {
++               return NULL;
++       }
+        struct amdgpu_device *adev = (struct amdgpu_device *)reset_ctl->handle;
+        int i;

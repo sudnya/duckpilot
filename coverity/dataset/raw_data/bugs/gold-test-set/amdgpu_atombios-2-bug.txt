@@ -1,0 +1,13 @@
+Issue: Potential Buffer Overflow
+
+CID: 1002
+Severity: High
+Type: Security
+Category: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Function: amdgpu_atombios_copy_swap
+Line: 1630
+
+Description:
+A potential buffer overflow vulnerability exists because the code performs a memcpy operation without verifying if the num_bytes parameter exceeds the allocated size of the src_tmp buffer. When num_bytes is larger than src_tmp's capacity, the memcpy will write beyond the buffer's bounds.
+

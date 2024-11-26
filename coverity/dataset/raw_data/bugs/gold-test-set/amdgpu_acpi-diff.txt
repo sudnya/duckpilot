@@ -1,0 +1,13 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+index f85ace0..fdfdd21 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+@@ -246,7 +246,7 @@ static int amdgpu_atif_verify_interface(struct amdgpu_atif *atif)
+        memset(&output, 0, sizeof(output));
+
+        size = *(u16 *) info->buffer.pointer;
+-       if (size < 12) {
++       if (size < 12 || sizeof(output) < sizeof(info->buffer.pointer)) {
+                DRM_INFO("ATIF buffer is too small: %zu\n", size);
+                err = -EINVAL;
+                goto out;

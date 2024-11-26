@@ -1,0 +1,13 @@
+File:       drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+Function:   amdgpu_gem_object_create
+Line: 116
+Type:       Null Pointer Dereference
+Category:   Error Handling Issues
+CID:        12000
+Impact:     High
+
+Description:
+------------
+The function dereferences the pointer adev and resv without first checking if they are NULL. 
+If either pointer is NULL, dereferencing them (e.g. adev->dev or resv->lock) will cause a crash.
+

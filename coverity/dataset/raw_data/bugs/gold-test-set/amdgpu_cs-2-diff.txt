@@ -1,0 +1,13 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 1e475eb01417..d3db17084e3d 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+@@ -46,6 +46,8 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
+                                 struct drm_file *filp,
+                                 union drm_amdgpu_cs *cs)
+ {
++       if (cs == NULL)
++               return -EINVAL;
+        struct amdgpu_fpriv *fpriv = filp->driver_priv;
+
+        if (cs->in.num_chunks == 0)

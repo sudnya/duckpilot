@@ -1,0 +1,11 @@
+Issue: Lack of Boundary Checks
+Type: BUFFER_OVERFLOW
+File: drivers/gpu/drm/amd/amdgpu/vi.c
+Line: 659
+
+Description:
+The function vi_read_bios_from_rom lacks proper boundary checks when reading data into the bios buffer. 
+The function calculates the number of dwords to read based on the input length_bytes, but it doesn't verify 
+if this calculated length exceeds the actual allocated size of the bios buffer. 
+This can lead to a buffer overflow, potentially causing memory corruption or security vulnerabilities.
+

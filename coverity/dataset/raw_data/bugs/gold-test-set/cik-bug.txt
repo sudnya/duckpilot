@@ -1,0 +1,15 @@
+Integer Overflow in cik_read_bios_from_rom
+CID: 2002
+
+Severity: High
+Type: Integer Overflow
+File: drivers/gpu/drm/amd/amdgpu/cik.c
+Line: 1028
+Location: cik_read_bios_from_rom function
+Description
+A potential integer overflow has been detected in the cik_read_bios_from_rom function. 
+The variable dw_ptr, which is of type u8, is assigned the result of an ALIGN 
+macro operation that can produce values greater than 255 for certain inputs of length_bytes.
+
+u8 dw_ptr = ALIGN(length_bytes, 4);
+

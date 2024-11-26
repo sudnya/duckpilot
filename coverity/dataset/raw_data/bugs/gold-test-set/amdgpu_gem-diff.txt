@@ -1,0 +1,13 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 0e617df..722605f 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+@@ -47,6 +47,8 @@ static const struct drm_gem_object_funcs amdgpu_gem_object_funcs;
+
+ static vm_fault_t amdgpu_gem_fault(struct vm_fault *vmf)
+{
++       if (!vmf || !vmf->vma || !vmf->vma->vm_private_data)
++           return VM_FAULT_SIGSEGV;
+        struct ttm_buffer_object *bo = vmf->vma->vm_private_data;
+        struct drm_device *ddev = bo->base.dev;
+        vm_fault_t ret;

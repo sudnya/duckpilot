@@ -1,0 +1,11 @@
+CID: 12345
+Classification: NULL_RETURNS
+Function: aldebaran_get_reset_handler
+File: drivers/gpu/drm/amd/amdgpu/aldebaran.c
+Line: 50
+
+Description:
+The function 'aldebaran_get_reset_handler' dereferences 'reset_ctl->handle' without first checking if 
+'reset_ctl' or 'reset_ctl->handle' is NULL. This could lead to a null pointer dereference if either 
+'reset_ctl' or 'reset_ctl->handle' is NULL when the function is called.
+

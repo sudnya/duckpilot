@@ -1,0 +1,14 @@
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+index 0c8975ac5af9..300e5d19a9e6 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+@@ -1625,6 +1625,9 @@ void amdgpu_atombios_copy_swap(u8 *dst, u8 *src, u8 num_bytes, bool to_le)
+        u32 src_tmp[5], dst_tmp[5];
+        int i;
+        u8 align_num_bytes = ALIGN(num_bytes, 4);
++       if (align_num_bytes > sizeof(src_tmp)) {
++        return;
++    }
+
+        if (to_le) {
+                memcpy(src_tmp, src, num_bytes);

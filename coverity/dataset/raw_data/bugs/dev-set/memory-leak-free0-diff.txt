@@ -1,0 +1,12 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+@@ -544,6 +544,10 @@ static struct sg_table *create_sg_table(uint64_t addr, uint32_t size)
+ #ifdef CONFIG_NEED_SG_DMA_LENGTH
+        sg->sgl->dma_length = size;
+ #endif
++    if (!sg) {
++        pr_warn("sg table buffer is NULL");
++        return NULL;
++    }
+     return sg;
+}

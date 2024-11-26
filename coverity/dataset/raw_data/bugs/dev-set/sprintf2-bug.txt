@@ -1,0 +1,32 @@
+CID: 492835
+Type: Buffer overflow
+Severity: High
+Checker: BUFFER_SIZE
+Category: SECURE_CODING
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_fru_eeprom.c
+Function: amdgpu_fru_get_product_info
+Line: 131
+
+Problem:
+Potential buffer overflow when formatting device serial number using sprintf
+
+Abstract:
+The code uses sprintf to write a hexadecimal string representation of a 64-bit 
+unique ID into the fru_info->serial buffer without size checking. This could 
+lead to a buffer overflow if the destination buffer is smaller than the 
+formatted string length (including null terminator).
+
+Path:
+  drivers/gpu/drm/amd/amdgpu/amdgpu_fru_eeprom.c:131
+    sprintf(fru_info->serial, "%llx", adev->unique_id)
+
+Details:
+Converting a 64-bit value to hexadecimal format using sprintf can produce up to 
+16 characters plus a null terminator. Without bounds checking, this operation 
+risks writing beyond the end of the serial buffer if it's smaller than 17 bytes. 
+The code handles critical device identification information in kernel space, 
+making buffer overflows particularly dangerous.
+
+Fix:
+Replace sprintf with snprintf to enforce buffer size limits:
+  snprintf(fru_info->serial, sizeof(fru_info->serial), "%llx", adev->unique_id)

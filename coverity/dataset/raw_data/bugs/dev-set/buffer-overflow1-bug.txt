@@ -1,0 +1,15 @@
+Integer Overflow in vi_read_bios_from_rom
+CID: 2002
+
+Severity: High
+Type: Integer Overflow
+File: drivers/gpu/drm/amd/amdgpu/vi.c
+Line: 651
+Location: vi_read_bios_from_rom function
+Description
+An integer overflow risk has been identified in the vi_read_bios_from_rom function. 
+The variable length_dw, defined as a u8, is assigned the result of an ALIGN macro operation, 
+which can yield values exceeding 255 when certain length_bytes inputs are provided.
+
+u32 length_dw = ALIGN(length_bytes, 4);
+

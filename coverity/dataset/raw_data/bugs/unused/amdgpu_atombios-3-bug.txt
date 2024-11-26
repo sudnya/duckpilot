@@ -1,0 +1,15 @@
+Integer Overflow in amdgpu_atombios_copy_swap
+CID: 2002
+
+Severity: High
+Type: Integer Overflow
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_atombios.c
+Line: 1627
+Location: amdgpu_atombios_copy_swap function
+Description
+A potential integer overflow has been detected in the amdgpu_atombios_copy_swap function. 
+The variable align_num_bytes, which is of type u8, is assigned the result of an ALIGN 
+macro operation that can produce values greater than 255 for certain inputs of num_bytes.
+
+u8 align_num_bytes = ALIGN(num_bytes, 4);
+

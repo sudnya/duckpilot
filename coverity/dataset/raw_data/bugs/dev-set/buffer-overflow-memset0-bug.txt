@@ -1,0 +1,10 @@
+Issue: Potential Buffer Overflow
+Type: Buffer Overflow
+File: drivers/gpu/drm/amd/amdgpu/gfx_v9_4_2.c
+Line: 463
+
+Description:
+A potential buffer overflow has been detected in the function gfx_v9_4_2_wait_for_waves_assigned(). 
+The function uses a fixed-size buffer of 256 bytes to store a formatted string, but does not implement proper bounds checking. 
+The size of the string written to str depends on the values of constants CU_ID_MAX, SIMD_ID_MAX, and WAVE_ID_MAX, which are not taken 
+into account when determining the buffer size. This could lead to a buffer overflow if the accumulated string length exceeds the allocated buffer size.

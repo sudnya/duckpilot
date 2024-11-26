@@ -1,0 +1,13 @@
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/amdgpu_acpi.c
+@@ -300,6 +300,10 @@ static int amdgpu_atif_get_notification_params(struct amdgpu_atif *atif)
+
+        memset(&params, 0, sizeof(params));
+        size = min(sizeof(params), size);
++       size_t safe_size = min(sizeof(params), size);
++       if (safe_size > info->buffer.length) {
++               return -EINVAL;
++       }
+        memcpy(&params, info->buffer.pointer, size);
+
+        DRM_DEBUG_DRIVER("SYSTEM_PARAMS: mask = %#x, flags = %#x\n",

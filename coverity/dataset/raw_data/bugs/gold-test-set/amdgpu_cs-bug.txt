@@ -1,0 +1,10 @@
+Issue: Resource Leak
+File: drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+Function: amdgpu_cs_pass1
+Line: 218
+
+Description:
+A memory resource allocated using kvmalloc_array() may not be freed if an error occurs during execution.
+The function amdgpu_cs_pass1 allocates memory for chunk_array using kvmalloc_array(). 
+However, if an error occurs after this allocation but before the function successfully completes, the allocated memory may not be freed, resulting in a resource leak.
+

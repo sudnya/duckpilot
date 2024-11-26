@@ -1,0 +1,32 @@
+CID: 501947
+Type: Buffer overflow
+Severity: High
+Checker: BUFFER_SIZE
+Category: SECURE_CODING
+File: drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c
+Function: vcn_v2_0_sw_init
+Line: 169
+
+Problem: 
+Unbounded string copy when initializing VCN decoder ring name using sprintf
+
+Abstract:
+The code uses sprintf to write a fixed string into ring->name without size checking. 
+Additionally, there appears to be a syntax error in the fix attempt, as the sizeof 
+parameter is malformed. This could potentially overflow the destination buffer and 
+corrupt adjacent memory.
+
+Path:
+ drivers/gpu/drm/amd/amdgpu/vcn_v2_0.c:169
+   sprintf(ring->name, "vcn_dec")
+
+Details:
+The VCN decoder ring initialization code copies a hardcoded string "vcn_dec" into 
+the ring name buffer using sprintf without verifying the buffer size. While the 
+source string is constant in this case, using unbounded string operations in 
+kernel code is risky. Additionally, the attempted fix contains a syntax error in 
+the sizeof usage.
+
+Fix:
+Replace with properly formatted snprintf call:
+ snprintf(ring->name, sizeof(ring->name), "vcn_dec")

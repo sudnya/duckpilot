@@ -1,0 +1,14 @@
+diff --git a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+index b0f95a7..35f4479 100644
+--- a/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
++++ b/coverity/dataset/raw_data/code/drivers/gpu/drm/amd/amdgpu/aldebaran.c
+@@ -105,6 +105,9 @@ aldebaran_mode2_prepare_hwcontext(struct amdgpu_reset_control *reset_ctl,
+                                  struct amdgpu_reset_context *reset_context)
+ {
+        int r = 0;
++       if (!reset->ctl || !reset_ctl->handle) {
++               return NULL;
++       }
+        struct amdgpu_device *adev = (struct amdgpu_device *)reset_ctl->handle;
+
+        dev_dbg(adev->dev, "Aldebaran prepare hw context\n");
